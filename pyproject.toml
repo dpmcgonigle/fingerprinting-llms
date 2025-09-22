@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "llm-fingerprinting"
+version = "0.1.0"
+description = "Utilities and notebooks for tasks relating to Fingerprinting LLMs."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "Dan McGonigle" }]
+
+# Runtime deps that aren't provided by conda *can* go here.
+# For All-Conda, it's fine to keep this empty or minimal—Conda installs the heavy stuff.
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+  "black>=24.3.0",
+  "ruff>=0.6.0",
+  "mypy>=1.10",
+  "build>=1.2",     # python -m build
+  "twine>=5.1",     # optional, if you publish to PyPI
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+lint.select = ["E","F","I","UP","B"]
+lint.ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.12"
+strict_optional = true
+no_implicit_optional = true
+
+[tool.pytest.ini_options]
+addopts = "-q --strict-markers --disable-warnings --cov=your_package --cov-report=term-missing"
+testpaths = ["tests"]

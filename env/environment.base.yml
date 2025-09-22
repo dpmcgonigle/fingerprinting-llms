@@ -1,0 +1,24 @@
+# Environment file for LLM Fingerprinting project
+name: llm-fp
+channels:
+  - conda-forge
+dependencies:
+  - ipython
+  - jupyter
+  - matplotlib
+  - numpy
+  - pandas
+  - python=3.12
+  - pytorch
+  - scikit-learn
+  - scipy
+  - seaborn
+  # dev tooling
+  - black
+  - coverage
+  - hatchling
+  - mypy
+  - pre-commit
+  - pytest
+  - pytest-cov
+  - ruff

@@ -1,0 +1,10 @@
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+dependencies:
+  # pull PyTorch from the pytorch channel (GPU build will be selected)
+  - pytorch
+  # add the CUDA meta-package from NVIDIA channel (pairs with the pytorch build)
+  - pytorch-cuda=12.1
+
