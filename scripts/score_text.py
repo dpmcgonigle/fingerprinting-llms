@@ -21,9 +21,7 @@ from typing import Optional, Any
 
 
 def get_cli_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Score a text file using a vLLM server"
-    )
+    parser = argparse.ArgumentParser(description="Score a text file using a vLLM server")
     parser.add_argument(
         "--textfile",
         "-t",
@@ -61,7 +59,9 @@ def load_text_from_file(path: str) -> str:
 
 
 def extract_prompt_logprobs(
-    server: str, model: str, text: str,
+    server: str,
+    model: str,
+    text: str,
 ) -> list[Optional[tuple[str, int, float]]]:
     """Get the per-token prompt tokens and logprobs for the given text.
 
@@ -93,19 +93,19 @@ def extract_prompt_logprobs(
     if "error" in data:
         print(f"Error from server: {data['error']}")
         return
-    
+
     choices = data.get("choices")
     choice = choices[0]
     print(f"choice = {choice.keys()}")
 
     print(f"Response text : {choice["text"][:100]}...")
-    
+
     # list[None|dict[str, {logprob, ...}]]
     plps = []
     prompt_logprobs = choice.get("prompt_logprobs")
     if prompt_logprobs is None:
         raise ValueError(f"Missing prompt fields; keys={list(choice.keys())}")
-    
+
     for prompt_logprob in prompt_logprobs:
         if prompt_logprob is None:
             plps.append(None)
@@ -119,37 +119,34 @@ def extract_prompt_logprobs(
             key=lambda x: x[1]["rank"],
         )[0]
         best_token_info = prompt_logprob[best_token_id]
-        plps.append((
-            best_token_info["decoded_token"],
-            int(best_token_id),
-            int(best_token_info["rank"]),
-            float(best_token_info["logprob"]),
-        ))
+        plps.append(
+            (
+                best_token_info["decoded_token"],
+                int(best_token_id),
+                int(best_token_info["rank"]),
+                float(best_token_info["logprob"]),
+            )
+        )
     return plps
-
 
 
 def main(args: argparse.Namespace) -> None:
     server = f"http://{args.host}:{args.port}"
     text = load_text_from_file(args.textfile)
     print(f"Loaded text : {text[:100]}...{text[-100:]}")
-    logprobs: list[
-        Optional[tuple[str, int, float]]
-    ] = extract_prompt_logprobs(
+    logprobs: list[Optional[tuple[str, int, float]]] = extract_prompt_logprobs(
         server=server,
         model=args.model,
         text=text,
     )
 
     print(f"Token String, Token ID, Rank, LogProb")
-    #print("\t".join(prompt_token_ids[:20]))
+    # print("\t".join(prompt_token_ids[:20]))
     print(f"LPs : {logprobs[:20]}")
     print("...")
     print(f"...{logprobs[-20:]}")
-    #print(f"tokens={len(vals)} mean_lp={mean_lp:.4f} ppl={ppl:.2f}")
-    returned_text = "".join(
-        [t[0] if t is not None else "" for t in logprobs]
-    )
+    # print(f"tokens={len(vals)} mean_lp={mean_lp:.4f} ppl={ppl:.2f}")
+    returned_text = "".join([t[0] if t is not None else "" for t in logprobs])
     if returned_text == text:
         print("Returned text matches input text!!")
     else:
@@ -161,8 +158,7 @@ def main(args: argparse.Namespace) -> None:
         # for line in diff:
         #     print(line)
 
+
 if __name__ == "__main__":
     args = get_cli_args()
     main(args)
-
-

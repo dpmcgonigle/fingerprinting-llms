@@ -1,8 +1,8 @@
 #   Fingerprinting LLMs Meetings
 
 ##  Contents
-- [Project Description](#2025-09-19)
-- [Project Documentation](#2025-09-05)
+- [2025-09-19](#2025-09-19)
+- [2025-09-05](#2025-09-05)
 
 ## 2025-09-19
 Having looked into several datasets, I took a subset of a larger Reuters dataset (RCV1), which was compiled by UC Irvine.  See data/rcv1-uc-irvine-subset/reuter5050/README.md for more details.  I created a notebook with some Exploratory Data Analysis into this dataset in the home directory of this repository.

@@ -20,10 +20,9 @@ import argparse
 
 from huggingface_hub import snapshot_download
 
+
 def get_cli_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Download a model from Hugging Face Hub"
-    )
+    parser = argparse.ArgumentParser(description="Download a model from Hugging Face Hub")
     parser.add_argument(
         "--hf-token",
         type=str,
@@ -44,6 +43,7 @@ def get_cli_args() -> argparse.Namespace:
     )
     return parser.parse_args()
 
+
 def main(args: argparse.Namespace) -> None:
     os.makedirs(args.model_dir, exist_ok=True)
     snapshot_download(
@@ -52,6 +52,7 @@ def main(args: argparse.Namespace) -> None:
         local_dir=args.model_dir,
         local_dir_use_symlinks=False,
     )
+
 
 if __name__ == "__main__":
     args = get_cli_args()
