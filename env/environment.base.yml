@@ -3,6 +3,7 @@ name: llm-fp
 channels:
   - conda-forge
 dependencies:
+  - huggingface_hub
   - ipython
   - jupyter
   - matplotlib

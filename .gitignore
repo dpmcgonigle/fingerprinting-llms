@@ -30,6 +30,7 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
+.ruff_cache
 
 # Unit test / coverage reports
 htmlcov/

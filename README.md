@@ -2,6 +2,7 @@
 
 ##  Contents
 - [Project Description](#project-description)
+- [Project Documentation](#project-documentation)
 - [Installation](#installation)
     - [Environment](#environment)
     - [llm-fingerprinting](#llm-fingerprinting)
@@ -16,6 +17,11 @@ The aim is twofold:
 2. **Attribution** — identify which LLM may have produced a given text sample.
 
 The approach combines techniques from **stylometry, information theory, and signal processing** identify patterns that are subtle for humans but systematic for models.
+
+[Back to Top](#fingerprinting-llms)
+
+## Project Documentation
+I will be keeping documentation for tracking project details, meetings, explanations and goals in docs/
 
 [Back to Top](#fingerprinting-llms)
 

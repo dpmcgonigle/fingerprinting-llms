@@ -1,0 +1,9 @@
+model_list:
+  - model_name: llama31-8b-w4a16
+    litellm_params:
+      model: hosted_vllm/local/llama31-8b-w4a16
+      api_base: http://vllm-llama31-8b:8000/v1
+
+litellm_settings:
+  request_timeout: 600
+  set_verbose: false

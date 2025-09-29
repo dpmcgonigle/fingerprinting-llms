@@ -1,0 +1,3 @@
+#   VLLM for serving models
+#   Install into a python 3.11.0 environment
+vllm==0.10.2

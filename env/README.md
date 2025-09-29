@@ -5,11 +5,18 @@ This document contains instructions for creating environments, and creating the 
 
 ##  Installation
 
-### Create Environment with CPU only 
-`conda-lock install --name llm conda-lock.cpu.conda-lock.yml`
+### Create Dev Environment with CPU only 
+`conda-lock install --name llm-fp conda-lock.cpu.conda-lock.yml`
 
-### Create Environment with GPU
+### Create Dev Environment with GPU
 `conda-lock install --name llm-fp conda-lock.gpu.cuda121.conda-lock.yml`
+
+### Create VLLM Environment for serving models
+```bash
+conda create vllm-env python==3.11.0 -y
+conda activate vllm-env
+pip install -r vllm-requirements.txt
+```
 
 ##  Lockfiles
 These are used to provide exact reproducibility of Conda environments across different machines and over time.  These will need to be re-generated if the dependencies change.

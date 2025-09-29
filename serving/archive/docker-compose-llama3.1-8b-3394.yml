@@ -1,0 +1,36 @@
+services:
+  vllm-llama31-8b:
+    image: vllm/vllm-openai:v0.9.2
+    shm_size: "128gb"
+    environment:
+      - VLLM_NO_USAGE_STATS=1
+      - VLLM_IMAGE_FETCH_TIMEOUT=10
+      - VLLM_USE_V1=1
+      - OMP_NUM_THREADS=8
+    volumes:
+      - /disk1/dma0523:/data
+    command: >
+      --model /data/models/llama3.1-8b-w4a16               # <-- local path INSIDE the container
+      --tensor-parallel-size 1
+      --max-model-len 8192
+      --gpu-memory-utilization 0.85
+      --trust-remote-code
+    ports:
+      - "9608:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['0']
+              capabilities: [ gpu ]
+
+  litellm_proxy:
+    image: ghcr.io/berriai/litellm:main-latest
+    depends_on:
+      - vllm-llama31-8b
+    volumes:
+      - ./config-llama3.1-8b-w4a16.yml:/app/config.yaml
+    command: --config /app/config.yaml --num_workers 8
+    ports:
+      - "9052:4000"
