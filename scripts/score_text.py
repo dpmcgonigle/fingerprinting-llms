@@ -14,10 +14,9 @@ Usage:
         -t data/rcv1-uc-irvine-subset/reuter5050/C50train/AaronPressman/407599newsML.txt  \
         -m /disk2/dma0523/models/llama3.1-70b-w4a16 -p 9000
 """
-import difflib
-import requests
 import argparse
-from typing import Optional, Any
+
+import requests
 
 
 def get_cli_args() -> argparse.Namespace:
@@ -53,7 +52,7 @@ def get_cli_args() -> argparse.Namespace:
 
 
 def load_text_from_file(path: str) -> str:
-    with open(path, "r") as f:
+    with open(path) as f:
         lines = f.readlines()
     return "".join(lines)
 
@@ -62,7 +61,7 @@ def extract_prompt_logprobs(
     server: str,
     model: str,
     text: str,
-) -> list[Optional[tuple[str, int, float]]]:
+) -> list[tuple[str, int, float] | None]:
     """Get the per-token prompt tokens and logprobs for the given text.
 
     Args:
@@ -134,13 +133,13 @@ def main(args: argparse.Namespace) -> None:
     server = f"http://{args.host}:{args.port}"
     text = load_text_from_file(args.textfile)
     print(f"Loaded text : {text[:100]}...{text[-100:]}")
-    logprobs: list[Optional[tuple[str, int, float]]] = extract_prompt_logprobs(
+    logprobs: list[tuple[str, int, float] | None] = extract_prompt_logprobs(
         server=server,
         model=args.model,
         text=text,
     )
 
-    print(f"Token String, Token ID, Rank, LogProb")
+    print("Token String, Token ID, Rank, LogProb")
     # print("\t".join(prompt_token_ids[:20]))
     print(f"LPs : {logprobs[:20]}")
     print("...")

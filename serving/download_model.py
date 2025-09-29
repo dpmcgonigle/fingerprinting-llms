@@ -15,8 +15,8 @@ Usage:
         --repo-id "neuralmagic/Meta-Llama-3.1-70B-Instruct-quantized.w4a16" \
         --model-dir /disk1/dma0523/models/llama3.1-70b-w4a16
 """
-import os
 import argparse
+import os
 
 from huggingface_hub import snapshot_download
 

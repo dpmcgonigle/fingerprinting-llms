@@ -11,6 +11,9 @@ requires-python = ">=3.12"
 license = { text = "MIT" }
 authors = [{ name = "Dan McGonigle" }]
 
+[tool.hatch.build.targets.wheel]
+packages = ["fingerprinting_llms"]
+
 # Runtime deps that aren't provided by conda *can* go here.
 # For All-Conda, it's fine to keep this empty or minimal—Conda installs the heavy stuff.
 dependencies = []

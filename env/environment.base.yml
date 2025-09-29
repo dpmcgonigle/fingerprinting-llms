@@ -3,17 +3,23 @@ name: llm-fp
 channels:
   - conda-forge
 dependencies:
+  - ftfy
   - huggingface_hub
   - ipython
   - jupyter
   - matplotlib
   - numpy
   - pandas
+  - pip
   - python=3.12
   - pytorch
+  - rapidfuzz
+  - regex
   - scikit-learn
   - scipy
   - seaborn
+  - spacy
+  - wordfreq
   # dev tooling
   - black
   - coverage
