@@ -63,7 +63,7 @@ def main(args: argparse.Namespace) -> None:
     with open(args.inputfile) as f:
         text = f.read()
 
-    logger.info("Preprocessing text")
+    logger.info("Preprocessing text ")
     cleaned_document = preprocessor.clean_document(text=text)
 
     logger.info(f"Saving processed text to {args.outputfile}")
