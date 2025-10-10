@@ -461,6 +461,14 @@ class CleanedDocument:
     spell_change_ratio: float
 
 
+    def save(self, filepath: str) -> None:
+        """Save the document"""
+        logger.info(f"Saving cleaned text {filepath}")
+        
+        with open(filepath, "w") as f:
+            f.write(s=self.clean_text)
+
+
 class TextPreprocessor:
     """
     Text cleaning pipeline orchestrator.

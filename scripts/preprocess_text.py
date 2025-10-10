@@ -68,8 +68,7 @@ def main(args: argparse.Namespace) -> None:
 
     logger.info(f"Saving processed text to {args.outputfile}")
     os.makedirs(os.path.dirname(args.outputfile), exist_ok=True)
-    with open(args.outputfile, "w") as f:
-        f.write(cleaned_document.clean_text)
+    cleaned_document.save(args.outputfile)
 
     logger.info("Preprocessing complete")
 
