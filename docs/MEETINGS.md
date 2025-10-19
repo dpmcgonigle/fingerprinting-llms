@@ -7,23 +7,26 @@
 
 ## 2025-10-10
 
-Projected next steps (prior to meeting)
-- Complete dataset cleaning (by 10/12)
-- Generate LLM-generated corpus (by 10/12)
-- Save log probabilities to parquet (by 10/12)
-- Explore signals to transform
-    - Raw log probabilities
-    - Sliding window entropy of log probabilities
-    - "Surprise" metric (delta between adjacent tokens)
-- Explore transformations
-    - DFT
-    - STFT
-    - Wavelet
+Next steps
+- Complete dataset cleaning
+- Generate LLM-generated corpus
 - Explore distribution comparisons
     - KL Divergence
     - JS Divergence
     - Earth Mover (Wasserstein) Distance
+- Analyze log probs of LLM output with different LLM
+    - See if there is a "bias" towards high log probs using the same model
+- Save log probabilities to parquet (or other data format)
 - Explore "featurization" for classification
+- Future considerations
+    - Explore transformations
+        - DFT
+        - STFT
+        - Wavelet
+    - Explore signals to transform
+        - Raw log probabilities
+        - Sliding window entropy of log probabilities
+        - "Surprise" metric (delta between adjacent tokens)
 
 ## 2025-09-19
 Having looked into several datasets, I took a subset of a larger Reuters dataset (RCV1), which was compiled by UC Irvine.  See data/rcv1-uc-irvine-subset/reuter5050/README.md for more details.  I created a notebook with some Exploratory Data Analysis into this dataset in the home directory of this repository.

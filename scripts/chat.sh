@@ -3,13 +3,16 @@
 # Test if a model is up and running
 #
 # Examples:
-#   ./ping-models.sh
+#   ./chat.sh -mp "/disk2/dma0523/models/llama3.1-70b-w4a16" -p 9003
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
+#   VARIABLES
 MESSAGE="Tell me a joke."
-MAX_TOKENS=100
+MAX_TOKENS=2000
 MODEL_PATH=""
 PORT="8000"
+USE_JQ=true
+OUTPUTFILE=""
 
 ############	functions	##############
 function datetimestamp() {
@@ -28,19 +31,21 @@ function log() {
     fi
 }
 
-HELP="""Script to wrap serving vllm without docker
+HELP="""Script to wrap chat compleation from a model running on VLLM
 
 ./view-models.sh [OPTIONS]
 
 Optional:
-    -m|--model-path <str>
+    -mp|--model-path <str>
         Path to the model directory
     -mt|--max-tokens <int>
         Max tokens to generate (default: ${MAX_TOKENS})
     -m|--message <str>
         Message to send to the model (default: ${MESSAGE})
     -p|--port <int>
-        Port to serve on (default: ${PORT})
+        Port model is served on (default: ${PORT})
+    -o|--output-file
+        File to output response to
     -h|--help
         Print this help message"""
 
@@ -107,6 +112,19 @@ do
         PORT="${1#*=}"
         shift
         ;;
+
+        -o|--output-file)
+        if [ $# -lt 2 ]; then
+            log "ERROR" "ARGS" "missing PYTHON"
+        fi
+        OUTPUTFILE=$2
+        shift
+        shift
+        ;;
+        -o=*|--output-file=*)
+        OUTPUTFILE="${1#*=}"
+        shift
+        ;;
     esac
 done
 
@@ -114,17 +132,35 @@ done
 if [ -z "$MODEL_PATH" ]; then
     log "ERROR" "ARGS" "missing MODEL_PATH"
 fi
-if [ ! -d "$MODEL_PATH" ]; then
-    log "ERROR" "ARGS" "MODEL_PATH $MODEL_PATH not found"
-fi
 
 #   Ping the model
 log "INFO" "MAIN" "Pinging model ${MODEL_PATH} on port $PORT"
 
-curl http://localhost:${PORT}/v1/chat/completions -H "Content-Type: application/json" -d "{
+# JSON-escape the message using sed (handles \ " tabs CR LF and general backslashes)
+json_escape() {
+  awk 'BEGIN{ORS=""; sep=""}
+       { gsub(/\\/,"\\\\"); gsub(/"/,"\\\""); gsub(/\t/,"\\t"); gsub(/\r/,"\\r");
+         printf "%s%s", sep, $0; sep="\\n" }
+       END{print ""}'
+}
+ESCAPED_MESSAGE="$(printf '%s' "$MESSAGE" | json_escape)"
+
+RESPONSE=$(curl http://localhost:${PORT}/v1/chat/completions -H "Content-Type: application/json" -d "{
     \"model\": \"${MODEL_PATH}\",
-    \"messages\": [{\"role\":\"user\",\"content\":\"${MESSAGE}\"}],
+    \"messages\": [{\"role\":\"user\",\"content\":\"${ESCAPED_MESSAGE}\"}],
     \"max_tokens\": ${MAX_TOKENS},
     \"top_p\": 0.75,
     \"stream\": false
-}"
+}")
+
+if [ "$USE_JQ" == "true" ]; then
+    log "INFO" "MAIN" "Performing jq on $RESPONSE"
+    RESPONSE=$(printf '%s' "$RESPONSE" | jq -r '.choices[0].message.content // .choices[0].text // empty')
+fi
+
+if [ ! -z "$OUTPUTFILE" ]; then
+    mkdir -p $(dirname $OUTPUTFILE)
+    printf '%s' "$RESPONSE" > $OUTPUTFILE
+else
+    log "INFO" "MAIN" "$RESPONSE"
+fi

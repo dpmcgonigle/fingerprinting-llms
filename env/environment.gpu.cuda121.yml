@@ -7,4 +7,3 @@ dependencies:
   - pytorch
   # add the CUDA meta-package from NVIDIA channel (pairs with the pytorch build)
   - pytorch-cuda=12.1
-

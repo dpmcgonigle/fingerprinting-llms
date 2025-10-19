@@ -8,7 +8,13 @@
 #   serve-metal.sh --default-0093
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
+#   DEFAULTS
 PORT="8000"
+GPU_MEMORY_UTILIZATION=0.85
+MAX_MODEL_LEN=8192
+DTYPE="auto"
+EXTRA_ARGS=""
+NUM_GPUS=1
 
 ############	functions	##############
 function datetimestamp() {
@@ -34,13 +40,23 @@ HELP="""Script to wrap serving vllm without docker
 Optional:
     -c|--cuda-visible-devices <str>
         Comma-separated list of GPU ids to use, e.g. "0,1,2"
-    -m|--model-path <str>
+    -mp|--model-path <str>
         Path to the model directory
     -p|--port <int>
-        Port to serve on (default: 8000)
+        Port to serve on (default: $PORT)
+    -g|--gpu-memory-utilization
+        How much GPU memory overhead to use (default: $GPU_MEMORY_UTILIZATION)
+    -mml|--max-model-len 
+        Maximum model length to use (default: $MAX_MODEL_LENGTH)
+    -d|--dtype
+        Data Type to use (default: $DTYPE)
+    -ng|--num-gpus
+        Number of GPUs (default: $NUM_GPUS)
     --default-3394
         Shortcut for defaults on a particular server
     --default-0093
+        Shortcut for defaults on a particular server
+    --default-0094
         Shortcut for defaults on a particular server
     -h|--help
         Print this help message"""
@@ -95,6 +111,58 @@ do
         PORT="${1#*=}"
         shift
         ;;
+
+        -g|--gpu-memory-utilization)
+        if [ $# -lt 2 ]; then
+            log "ERROR" "ARGS" "missing PYTHON"
+        fi
+        GPU_MEMORY_UTILIZATION=$2
+        shift
+        shift
+        ;;
+        -g=*|--gpu-memory-utilization=*)
+        GPU_MEMORY_UTILIZATION="${1#*=}"
+        shift
+        ;;
+
+        -mml|--max-model-len)
+        if [ $# -lt 2 ]; then
+            log "ERROR" "ARGS" "missing PYTHON"
+        fi
+        MAX_MODEL_LEN=$2
+        shift
+        shift
+        ;;
+        -mml=*|--max-model-len=*)
+        MAX_MODEL_LEN="${1#*=}"
+        shift
+        ;;
+
+        -d|--dtype)
+        if [ $# -lt 2 ]; then
+            log "ERROR" "ARGS" "missing PYTHON"
+        fi
+        DTYPE=$2
+        shift
+        shift
+        ;;
+        -d=*|--dtype=*)
+        NUM_GPUS="${1#*=}"
+        shift
+        ;;
+
+        -ng|--num-gpus)
+        if [ $# -lt 2 ]; then
+            log "ERROR" "ARGS" "missing PYTHON"
+        fi
+        DTYPE=$2
+        shift
+        shift
+        ;;
+        -ng=*|--num-gpus=*)
+        NUM_GPUS="${1#*=}"
+        shift
+        ;;
         
         --default-3394)
         CUDA_VISIBLE_DEVICES="0"
@@ -105,6 +173,25 @@ do
         --default-0093)
         CUDA_VISIBLE_DEVICES="7"
         MODEL_PATH="/disk2/dma0523/models/llama3.1-70b-w4a16"
+        shift
+        ;;
+        
+        --0094-mixtral)
+        CUDA_VISIBLE_DEVICES="5,6,7"
+        MODEL_PATH="/proj/redline/team/mcg/models/Mixtral-8x7B-Instruct-v0.1"
+        MAX_MODEL_LEN=4096
+        NUM_GPUS=3
+        shift
+        ;;
+        
+        --default-0094)
+        CUDA_VISIBLE_DEVICES="7"
+        MODEL_PATH="/proj/redline/team/mcg/models/Mixtral-8x7B-Instruct-v0.1-AWQ"
+        DTYPE="float16"
+        GPU_MEMORY_UTILIZATION=0.8
+        MAX_MODEL_LEN=4096
+        EXTRA_ARGS="--quantization awq"
+        #EXTRA_ARGS="--chat-template templates/mixtral_chat_template.jinja --quantization awq --chat-template-content-format jinja2"
         shift
         ;;
     esac
@@ -124,8 +211,10 @@ fi
 # Start serving
 log "INFO" "MAIN" "Starting vLLM server with model $MODEL_PATH on CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES"
 CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES} vllm serve $MODEL_PATH \
-  --tensor-parallel-size 1 \
-  --max-model-len 8192 \
-  --gpu-memory-utilization 0.85 \
+  --tensor-parallel-size $NUM_GPUS \
+  --max-model-len $MAX_MODEL_LEN \
+  --gpu-memory-utilization $GPU_MEMORY_UTILIZATION \
+  --dtype $DTYPE \
   --port ${PORT} \
-  --trust-remote-code
+  --trust-remote-code \
+  $EXTRA_ARGS

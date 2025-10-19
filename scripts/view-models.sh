@@ -25,13 +25,13 @@ function log() {
     fi
 }
 
-HELP="""Script to wrap serving vllm without docker
+HELP="""Script to check model running on a port
 
 ./view-models.sh [OPTIONS]
 
 Optional:
     -p|--port <int>
-        Port to serve on (default: 8000)
+        Port model is being served on (default: 8000)
     -h|--help
         Print this help message"""
 

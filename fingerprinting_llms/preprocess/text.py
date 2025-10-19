@@ -47,18 +47,20 @@ class TextPreprocessorConfig:
     normalize_dates_times : bool
         If True, normalize common date patterns to YYYY-MM-DD and common times
         to 24h HH:MM, and fix common %/$ spacing issues.
-    conservative_spelling : bool
-        If True, apply a very conservative spelling correction that fixes only
-        obvious repeated-letter typos when a very common alternative exists.
     entity_masking : bool
         If True, replace recognized entities with <LABEL_i> tags (requires spaCy).
         Keep False for your primary run; use as a separate experiment.
+
+    conservative_spelling : bool
+        If True, apply a very conservative spelling correction that fixes only
+        obvious repeated-letter typos when a very common alternative exists.
     max_change_ratio : float
         Max fraction of alpha tokens per document that may be altered by the
         spelling corrector. If exceeded, the spell pass is **aborted**.
     min_zipf_for_correction : float
         Only correct to candidates with wordfreq.zipf_frequency >= this value,
         i.e., to fairly common English words.
+
     english_only : bool
         Placeholder for a language ID step (not implemented below). Keep True
         if you plan to plug in a langid check later.
@@ -72,11 +74,13 @@ class TextPreprocessorConfig:
     normalize_spacing_punct: bool = True
     fix_linebreak_hyphenation: bool = True
     normalize_dates_times: bool = True
-    conservative_spelling: bool = True
     entity_masking: bool = False
+    #   These 3 are for spelling
+    conservative_spelling: bool = False
     max_change_ratio: float = 0.01
     min_zipf_for_correction: float = 4.0
-    english_only: bool = True
+    #   Not implemented
+    english_only: bool = False
     dedupe_signature: bool = False
 
 
@@ -460,13 +464,12 @@ class CleanedDocument:
     clean_len: int
     spell_change_ratio: float
 
-
     def save(self, filepath: str) -> None:
         """Save the document"""
         logger.info(f"Saving cleaned text {filepath}")
-        
+
         with open(filepath, "w") as f:
-            f.write(s=self.clean_text)
+            f.write(self.clean_text)
 
 
 class TextPreprocessor:

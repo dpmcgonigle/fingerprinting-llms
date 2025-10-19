@@ -1,0 +1,30 @@
+#   Issues
+
+##  Description
+This is just a place to document specific issues I've run into
+
+##  Integer out of bounds
+My token ranks is currently using int16, but it seems like the size of the vocabulary exceeds that:
+
+```bash
+Traceback (most recent call last):
+  File "/Users/dma0523/code/math/fingerprinting-llms/scripts/score_text.py", line 106, in <module>
+    main(args)
+  File "/Users/dma0523/code/math/fingerprinting-llms/scripts/score_text.py", line 99, in main
+    score_doc(server=server, model=args.model, input_filepath=args.input_filepath, output_filepath=args.output_filepath)
+  File "/Users/dma0523/code/math/fingerprinting-llms/scripts/score_text.py", line 78, in score_doc
+    logprobs: LogProbs = extract_prompt_logprobs(
+                         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/anaconda3/envs/llm-fp/lib/python3.12/site-packages/fingerprinting_llms/score/extract.py", line 87, in extract_prompt_logprobs
+    log_probs = LogProbs.from_lists(
+                ^^^^^^^^^^^^^^^^^^^^
+  File "/opt/anaconda3/envs/llm-fp/lib/python3.12/site-packages/fingerprinting_llms/score/__init__.py", line 36, in from_lists
+    arr_ranks = np.asarray(token_ranks, dtype=np.int16)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OverflowError: Python integer 55705 out of bounds for int16
+```
+
+Note that this appears to be exceedingly rare (I ran into it once in scoring 100 files, I think).
+
+##  Mixtral-8x7B-Instruct-v0.1-AWQ failure
+I wasn't able to get this working.  I troubleshot it for a while and then gave up, using Mixtral-8x7B-Instruct-v0.1 for the "secondary LLM".
