@@ -14,6 +14,13 @@ Usage:
     
     for FILE in $(cat PRESSMAN.txt); do 
         python scripts/score_text.py \
+            -i data/rcv1-uc-irvine-subset/reuter5050/C50train_clean/AaronPressman/$FILE \
+            -o data/tokens/human/reuter5050/C50train/AaronPressman/${FILE}.npz \
+            -m /disk2/dma0523/models/llama3.1-70b-w4a16 -p 9003
+    done
+        
+    for FILE in $(cat PRESSMAN.txt); do 
+        python scripts/score_text.py \
             -i data/llama70Bw4a16/reuter5050/C50train_clean/AaronPressman/$FILE \
             -o data/tokens/llama70Bw4a16-bigmixtral-graded/reuter5050/C50train/AaronPressman/${FILE}.npz \
             -m /proj/redline/team/mcg/models/Mixtral-8x7B-Instruct-v0.1 -p 9999

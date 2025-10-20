@@ -58,6 +58,8 @@ Optional:
         Shortcut for defaults on a particular server
     --default-0094
         Shortcut for defaults on a particular server
+    --0094-mixtral
+        Run full mixtral on 0094
     -h|--help
         Print this help message"""
 
@@ -171,8 +173,10 @@ do
         ;;
         
         --default-0093)
-        CUDA_VISIBLE_DEVICES="7"
+        CUDA_VISIBLE_DEVICES="2"
         MODEL_PATH="/disk2/dma0523/models/llama3.1-70b-w4a16"
+        MAX_MODEL_LEN=4096
+        PORT=8003
         shift
         ;;
         
@@ -185,6 +189,7 @@ do
         ;;
         
         --default-0094)
+        log "ERROR" "ARGS" "Can't get --default-0094 working due to AWQ model issue"
         CUDA_VISIBLE_DEVICES="7"
         MODEL_PATH="/proj/redline/team/mcg/models/Mixtral-8x7B-Instruct-v0.1-AWQ"
         DTYPE="float16"
