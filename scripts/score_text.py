@@ -1,6 +1,4 @@
 #! /usr/bin/env python
-
-#! /usr/bin/env python
 """
 score_text.py
 
@@ -12,18 +10,39 @@ Usage:
         -o data/tokens/llama3.1-70b-w4a16/reuter5050/C50train/AaronPressman/407599newsML.txt.npz  \
         -m /disk2/dma0523/models/llama3.1-70b-w4a16 -p 9003
     
-    for FILE in $(cat PRESSMAN.txt); do 
+    for FILE in $(find data/rcv1-uc-irvine-subset/reuter5050/C50train_clean/ -type f); do echo $FILE >> HUMAN.txt; done
+    for FILE in $(cat HUMAN.txt); do 
+        printf "\n\n*   *   *   *   STARTING $FILE  *   *   *"
         python scripts/score_text.py \
-            -i data/rcv1-uc-irvine-subset/reuter5050/C50train_clean/AaronPressman/$FILE \
-            -o data/tokens/human/reuter5050/C50train/AaronPressman/${FILE}.npz \
+            -i $FILE \
+            -o ${FILE/rcv1-uc-irvine-subset/tokens\/human_llama-graded}.npz \
             -m /disk2/dma0523/models/llama3.1-70b-w4a16 -p 9003
     done
-        
-    for FILE in $(cat PRESSMAN.txt); do 
+
+    for FILE in $(cat HUMAN.txt); do 
+        printf "\n\n*   *   *   *   STARTING $FILE  *   *   *"
         python scripts/score_text.py \
-            -i data/llama70Bw4a16/reuter5050/C50train_clean/AaronPressman/$FILE \
-            -o data/tokens/llama70Bw4a16-bigmixtral-graded/reuter5050/C50train/AaronPressman/${FILE}.npz \
-            -m /proj/redline/team/mcg/models/Mixtral-8x7B-Instruct-v0.1 -p 9999
+            -i $FILE \
+            -o ${FILE/rcv1-uc-irvine-subset/tokens\/human_bigmixtral-graded}.npz \
+            -m /proj/redline/team/mcg/models/Mixtral-8x7B-Instruct-v0.1 -p 9002
+    done
+        
+    for FILE in $(find data/llama70Bw4a16/reuter5050/C50train_clean/ -type f); do echo $FILE >> LLAMA.txt; done
+    for FILE in $(cat LLAMA.txt); do 
+        printf "\n\n*   *   *   *   STARTING $FILE  *   *   *"
+        python scripts/score_text.py \
+            -i $FILE \
+            -o ${FILE/llama70Bw4a16/tokens\/llama70Bw4a16}.npz \
+            -m /disk2/dma0523/models/llama3.1-70b-w4a16 -p 9003
+    done
+
+    for FILE in $(find data/mixtral-8x7B-instruct/reuter5050/C50train_clean/ -type f); do echo $FILE >> MIXTRAL.txt; done
+    for FILE in $(cat MIXTRAL.txt); do 
+        printf "\n\n*   *   *   *   STARTING $FILE  *   *   *"
+        python scripts/score_text.py \
+            -i $FILE \
+            -o ${FILE/mixtral-8x7B-instruct/tokens\/llama70Bw4a16-bigmixtral-graded}.npz \
+            -m /proj/redline/team/mcg/models/Mixtral-8x7B-Instruct-v0.1 -p 9002
     done
 """
 import os
