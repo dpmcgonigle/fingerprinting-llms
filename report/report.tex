@@ -106,19 +106,93 @@ To investigate this hypothesis, we conducted a systematic comparison between hum
 There are two goals in this work: The first goal is to assess whether frequency-domain analysis provides meaningful discriminatory power between human and model text. The second is to establish a foundation for spectral fingerprinting, with the hope that this can be done in a model-agnostic manner. The findings of this study demonstrate some promising signal-level regularities that suggest LLMs possess spectral patterns across generations, motivating future research into cross-model generalization, temporal dynamics of attention mechanisms, and the integration of spectral features into broader model-audit frameworks.
 
 \chapter{Background and Related Work}
+
+This body of works covers a lot of ground from LLMs and detecting generative content, to tools for analyzing signals in the frequency domain, including computer science methodologies for classification.  This chapter serves as a brief introduction to these topics and discusses some of the relevant work.
+
+\section{Large Language Models}
+
 LLMs are autoregressive neural networks trained to predict the next token in a sequence given all preceding context. During generation, each output token is sampled from a probability distribution $P(t_i \mid t_{<i})$, representing the model's estimated likelihood of possible continuations at position $i$. These token-level probabilities capture a model's evolving internal state and confidence: when the model is highly certain, the distribution is sharply peaked; when uncertain, it is flatter. The logarithm of these probabilities, or \emph{log-probabilities}, are particularly useful because they linearize multiplicative relationships, stabilize numerical variation, and directly reflect the additive structure of sequence likelihoods.
 
-In this research, these per-token log-probabilities are treated not merely as statistical outcomes but as a \emph{temporal signal} that evolves as the model generates text. Each step in generation corresponds to a new sample in a discrete-time series whose fluctuations encode the model's shifting certainty, stylistic rhythm, and contextual transitions. This framing allows the use of signal-processing tools---such as Fourier and wavelet transforms---to examine structure in the \emph{frequency domain} rather than only the token-distribution domain. If model outputs differ systematically from human writing in the smoothness, periodicity, or spectral composition of their log-probability sequences, these differences can be interpreted as latent \emph{fingerprints} of the model's internal generative dynamics. By analyzing log-probabilities as signals, we aim to uncover whether LLMs exhibit distinctive frequency-domain patterns that remain stable across text samples and model families, providing a potential foundation for model attribution and authenticity detection.
+\section{Detecting Machine-Generated Text}
 
 Most existing detection techniques focus on lexical or syntactic cues, statistical irregularities such as word, phrase or punctuation probabilities, or leveraging neural networks as in ~\cite{wu2023survey}. Some approaches targeting specific data domains have showed limited success, as in DetectRL~\cite{wu2024detectrl}. Zhang et al.~\cite{zhang2024zeroshot} introduced a zero-shot detection approach that operates directly on token probability distributions, showing that simple statistical measures such as likelihood variance and divergence between human and model token-prob histograms can achieve strong performance (AUROC $\approx 0.9$) when distinguishing GPT-3 and ChatGPT text from human writing. Yet these methods often fail to generalize across models or fine-tuning conditions. 
 
+\section{Analyzing Signals in the Frequency Domain}
+
+
+Signal analysis in the frequency domain provides a powerful framework for understanding the underlying structure, periodicity, and energy distribution of time-varying data. Rather than analyzing a signal \( x(t) \) in the time domain—where the focus is on its instantaneous amplitude or value at each time point—frequency domain analysis decomposes the signal into constituent sinusoids of different frequencies, allowing researchers to study the spectral content and dominant oscillatory components.
+
+\subsection{The Fourier Transform and Its Discrete Counterparts}
+
+The \textit{Fourier Transform (FT)} expresses a signal as a sum of complex exponentials, mapping it from the time domain to the frequency domain~\cite{bracewell2000fourier}. For a continuous signal \( x(t) \), the Fourier Transform is defined as
+
+\begin{equation}
+    X(f) = \int_{-\infty}^{\infty} x(t)\, e^{-j2\pi f t}\, dt,
+\end{equation}
+
+where \( X(f) \) represents the complex-valued frequency spectrum. In analyzing the token-level log-probabilities of LLM output, the "time" domain for this research consists of discrete token positions. This use of discrete samples requires us to utilize the \textit{Discrete Fourier Transform (DFT)}, which is defined:
+
+\begin{equation}
+    X_k = \sum_{n=0}^{N-1} x_n\, e^{-j 2\pi k n / N}, 
+    \quad k = 0, 1, \ldots, N-1.
+\end{equation}
+
+The DFT converts a sequence of \( N \) samples into \( N \) complex coefficients corresponding to frequency bins. Efficient computation of the DFT is achieved using the \textit{Fast Fourier Transform (FFT)} algorithm~\cite{cooley1965algorithm}, which reduces computational complexity from \( O(N^2) \) to \( O(N \log N) \). The FFT underpins much of spectral analysis, providing useful tools for power spectral density estimation, filtering, and feature extraction in both scientific and engineering applications.
+
+\subsection{Limitations of Purely Frequency-Domain Analysis}
+
+While the Fourier Transform is effective for stationary signals—those whose frequency composition does not change over time—it is less suited for \textit{nonstationary} or \textit{transient} data, where the frequency content varies. The Fourier spectrum captures signal patterns by determining global frequency coefficients, but loses features that are temporally localized. This limitation motivated the development of \textit{time–frequency representations}, which aim to capture how frequency content evolves over time.
+
+\subsection{Wavelet Transforms and Time–Frequency Analysis}
+
+The \textit{Wavelet Transform (WT)} addresses the shortcomings of the Fourier framework by providing a multi-resolution view of a signal. Instead of fixed sinusoidal bases, wavelet analysis uses localized ``wavelets''—functions that are dilated and translated versions of a mother wavelet—to analyze both short, high-frequency events and long, low-frequency trends~\cite{mallat1989theory,daubechies1992ten}.  
+
+For a continuous-time signal \( x(t) \), the \textit{Continuous Wavelet Transform (CWT)} is defined as
+
+\begin{equation}
+    W(a, b) = \frac{1}{\sqrt{|a|}} 
+    \int_{-\infty}^{\infty} x(t)\, 
+    \psi^*\!\left(\frac{t - b}{a}\right)\, dt,
+\end{equation}
+
+where \( a \) and \( b \) denote the scale and translation parameters, respectively, and \( \psi(t) \) is the mother wavelet. The \textit{Discrete Wavelet Transform (DWT)} discretizes these parameters, yielding efficient computational schemes with compact representations of the signal across scales.
+
+Wavelet analysis has proven useful for analyzing signals with nonstationary or multi-scale structure—ranging from geophysical and biomedical signals to linguistic and generative model outputs~\cite{addison2017illustrated,flandrin1999time}. Recent work has also explored wavelet-based representations in deep learning contexts, integrating spectral decomposition into neural architectures~\cite{williams2020wavelets,liu2023wavelet}.
+
 \chapter{Methods}
-% Describe how you conducted the project. Keep it reproducible.
+
+In this research, these per-token log-probabilities are treated not merely as statistical outcomes but as a \emph{temporal signal} that evolves as the model generates text. Each step in generation corresponds to a new sample in a discrete-time series whose fluctuations encode the model's shifting certainty, stylistic rhythm, and contextual transitions. This framing allows the use of signal-processing tools---such as Fourier and wavelet transforms---to examine structure in the \emph{frequency domain} rather than only the token-distribution domain. If model outputs differ systematically from human writing in the smoothness, periodicity, or spectral composition of their log-probability sequences, these differences can be interpreted as latent \emph{fingerprints} of the model's internal generative dynamics. By analyzing log-probabilities as signals, we aim to uncover whether LLMs exhibit distinctive frequency-domain patterns that remain stable across text samples and model families, providing a potential foundation for model attribution and authenticity detection.
 
 \section{Dataset Curation}
-% Sources, inclusion/exclusion criteria, cleaning, splits, and any labeling.
-% Data governance/ethics if applicable. Versioning and tooling.
-% \lipsum[5]
+A rigorous and transparent dataset curation process is essential for any research endeavor involving linguistic or generative text analysis. This process encompasses corpus selection, data acquisition, cleaning, annotation, and metadata management. For the present study, the goal was to construct a corpus that balances diversity of authorship, disciplinary representation, and writing quality, while maintaining consistency in format and linguistic features suitable for quantitative and spectral analysis.
+
+\subsection{Source Corpus: The Michigan Corpus of Upper-Level Student Papers (MICUSP)}
+
+A key dataset used in this study is the \textit{Michigan Corpus of Upper-level Student Papers (MICUSP)}, a well-documented collection of academic writing produced by proficient undergraduate and graduate students at the University of Michigan~\cite{roemer2011micusp,odonnell2012micusp}.  
+The corpus was developed to represent high-quality student writing across a wide range of academic disciplines, capturing authentic examples of advanced learner language in academic contexts.  
+The compilation of MICUSP followed a carefully designed methodology involving institutional collaboration, participant consent, and detailed genre classification.
+
+Römer and O’Donnell~\cite{roemer2011micusp} describe the design and compilation of MICUSP (Part 1), emphasizing the corpus’s multi-disciplinary structure and genre taxonomy.  
+Each text was assigned to one of 16 academic disciplines (e.g., Linguistics, Psychology, Mechanical Engineering) and classified into one of four genre families—\textit{argumentative}, \textit{analytical}, \textit{report}, or \textit{narrative}—based on communicative purpose and rhetorical structure.  
+The resulting collection comprises approximately 830 student papers totaling 2.6 million words, with metadata including discipline, genre, grade level, native language, and gender of the author.
+
+O’Donnell and Römer~\cite{odonnell2012micusp} detail the annotation and online distribution of MICUSP (Part 2), which introduced a standardized XML format and consistent metadata schema.  
+Annotation layers include paragraph and sentence boundaries, structural divisions (e.g., introduction, discussion, conclusion), and genre-level metadata.  
+This structured representation facilitates computational approaches to text analysis, enabling tokenization, linguistic feature extraction, and model-based inference using reproducible workflows.
+
+\subsection{Preprocessing and Format Standardization}
+
+To ensure compatibility with machine learning and signal-processing pipelines, each document was normalized to a consistent UTF-8 text format.  
+Headers, page numbers, and non-linguistic artifacts were removed.  
+Tokenization, sentence segmentation, and part-of-speech tagging were performed using standard NLP preprocessing tools.  
+For quantitative analysis, token-level sequences were encoded into numerical arrays representing log-probabilities, entropy, or spectral characteristics (e.g., frequency-domain features derived via Fourier or wavelet transforms).  
+All processing steps were implemented in reproducible scripts to maintain consistency across datasets.
+
+\subsection{Ethical and Licensing Considerations}
+
+MICUSP is distributed under a research license for non-commercial academic use.  
+Only publicly available materials or those distributed with appropriate institutional permission were included.  
+No personally identifiable information was retained, and all data handling followed established corpus ethics and reproducibility standards.
 
 \section{Analysis of Distributions}
 % Statistical characterizations: token/prob distributions, ECDFs, divergence metrics
