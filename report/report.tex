@@ -133,7 +133,7 @@ Signal analysis in the frequency domain provides a powerful framework for unders
 
 \subsection{The Fourier Transform and Its Discrete Counterparts}
 
-The \textit{Fourier Transform (FT)} expresses a signal as a sum of complex exponentials, mapping it from the time domain to the frequency domain~\cite{bracewell2000fourier}. For a continuous signal \( x(t) \), the Fourier Transform is defined as
+The \textit{Fourier Transform (FT)} expresses a signal as a sum of complex exponentials, mapping it from the time domain to the frequency domain~\cite{oppenheim_signals_systems_ocw}. For a continuous signal \( x(t) \), the Fourier Transform is defined as
 
 \begin{equation}
     X(f) = \int_{-\infty}^{\infty} x(t)\, e^{-j2\pi f t}\, dt,
@@ -154,7 +154,7 @@ While the Fourier Transform is effective for stationary signals—those whose fr
 
 \subsection{Wavelet Transforms and Time-Frequency Analysis}
 
-The \textit{Wavelet Transform (WT)} addresses the shortcomings of the Fourier framework by providing a multi-resolution view of a signal. Instead of fixed sinusoidal bases, wavelet analysis uses localized ``wavelets''—functions that are dilated and translated versions of a mother wavelet—to analyze both short, high-frequency events and long, low-frequency trends~\cite{mallat1989theory,daubechies1992ten}.  
+The \textit{Wavelet Transform (WT)} addresses the shortcomings of the Fourier framework by providing a multi-resolution view of a signal. Instead of fixed sinusoidal bases, wavelet analysis uses localized ``wavelets''—functions that are dilated and translated versions of a mother wavelet—to analyze both short, high-frequency events and long, low-frequency trends~\cite{mallat1989theory,oppenheim_signals_systems_ocw}.  
 
 For a continuous-time signal \( x(t) \), the \textit{Continuous Wavelet Transform (CWT)} is defined as
 
@@ -166,7 +166,7 @@ For a continuous-time signal \( x(t) \), the \textit{Continuous Wavelet Transfor
 
 where \( a \) and \( b \) denote the scale and translation parameters, respectively, and \( \psi(t) \) is the mother wavelet. The \textit{Discrete Wavelet Transform (DWT)} discretizes these parameters, yielding efficient computational schemes with compact representations of the signal across scales.
 
-Wavelet analysis has proven useful for analyzing signals with nonstationary or multi-scale structure—ranging from geophysical and biomedical signals to linguistic and generative model outputs~\cite{addison2017illustrated,flandrin1999time}. Recent work has also explored wavelet-based representations in deep learning contexts, integrating spectral decomposition into neural architectures~\cite{williams2020wavelets,liu2023wavelet}.
+Wavelet analysis has proven useful for analyzing signals with nonstationary or multi-scale structure—ranging from geophysical and biomedical signals to linguistic data~\cite{addison2017illustrated}.
 
 
 % ---------- CHAPTER 3: Methods ----------
