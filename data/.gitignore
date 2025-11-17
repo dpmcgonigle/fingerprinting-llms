@@ -1,0 +1,4 @@
+#   Files in data that we don't want to version
+mixtral-8x7B-instruct/
+llama70Bw4a16/
+tokens/

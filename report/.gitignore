@@ -1,0 +1,15 @@
+#   LaTeX specific files
+
+references/
+
+*fdb_latexmk
+*aux
+*bbl
+*-SAVE-ERROR
+*blg
+*bcf
+*fls
+*out
+*xml
+*gz
+*toc

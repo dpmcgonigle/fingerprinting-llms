@@ -3,6 +3,11 @@
 ##  Contents
 - [Project Description](#project-description)
 - [Project Documentation](#project-documentation)
+- [Notebooks](#notebooks)
+    - [EDA-Stylometric](#eda-stylometric)
+    - [EDA-LogProbs](#eda-logprobs)
+    - [Burstiness-Author](#burstiness-author)
+    - [Burstiness-AllReuters](#burstiness-allreuters)
 - [Installation](#installation)
     - [Environment](#environment)
     - [llm-fingerprinting](#llm-fingerprinting)
@@ -17,6 +22,30 @@ The aim is twofold:
 2. **Attribution** — identify which LLM may have produced a given text sample.
 
 The approach combines techniques from **stylometry, information theory, and signal processing** identify patterns that are subtle for humans but systematic for models.
+
+[Back to Top](#fingerprinting-llms)
+
+## Notebooks
+
+This project contains various Jupyter notebooks organized into categories for different analysis stages:
+
+### EDA-Stylometric
+
+Exploratory Data Analysis focused on stylometric features of text. These notebooks were used to determine the optimal dataset for our research and necessary text cleaning procedures. They analyze traditional stylometric markers such as sentence length, vocabulary richness, and grammatical patterns.
+
+### EDA-LogProbs
+
+Analysis of log probability distributions to assess how distinguishable human and LLM-generated text are. These notebooks explore whether there's any inherent bias when evaluating LLM-generated text using the same model that produced it, and how this might affect detection methods.
+
+### Burstiness-Author
+
+Investigation of spectral and statistical differences between authentic author works and synthetically generated content mimicking their style. These notebooks focus on identifying unique "fingerprints" that distinguish genuine author patterns from LLM imitations.
+
+### Burstiness-AllReuters
+
+Generalization experiments across the Reuters dataset to test the broader applicability of our fingerprinting methods:
+- **v1**: Initial analysis using the original 7 core features from the Burstiness notebooks
+- **v2**: Expanded feature set with significantly more metrics to improve detection accuracy
 
 [Back to Top](#fingerprinting-llms)
 
