@@ -8,6 +8,7 @@
     - [EDA-LogProbs](#eda-logprobs)
     - [Burstiness-Author](#burstiness-author)
     - [Burstiness-AllReuters](#burstiness-allreuters)
+    - [Burstiness-*DeepDive](#burstiness-deepdive)
 - [Installation](#installation)
     - [Environment](#environment)
     - [llm-fingerprinting](#llm-fingerprinting)
@@ -46,6 +47,14 @@ Investigation of spectral and statistical differences between authentic author w
 Generalization experiments across the Reuters dataset to test the broader applicability of our fingerprinting methods:
 - **v1**: Initial analysis using the original 7 core features from the Burstiness notebooks
 - **v2**: Expanded feature set with significantly more metrics to improve detection accuracy
+
+### Burstiness-DeepDive
+
+Going deeper into the search space from the Burstiness-AllReuters notebooks for specific feature types.
+
+### Burstiness-EventAnalysis
+
+Looking at specific patterns of text as "events" to see if there is a detectable difference between human and LLM-generated content. 
 
 [Back to Top](#fingerprinting-llms)
 
