@@ -26,5 +26,8 @@ OverflowError: Python integer 55705 out of bounds for int16
 
 Note that this appears to be exceedingly rare (I ran into it once in scoring 100 files, I think).
 
+### 11/21/2025 -- I ran into this consistently now
+When grading Mixtral-generated docs with Llama, I'm getting this consistently, so I decided to bump up to int32
+
 ##  Mixtral-8x7B-Instruct-v0.1-AWQ failure
 I wasn't able to get this working.  I troubleshot it for a while and then gave up, using Mixtral-8x7B-Instruct-v0.1 for the "secondary LLM".

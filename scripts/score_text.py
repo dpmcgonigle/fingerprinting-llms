@@ -44,6 +44,13 @@ Usage:
             -o ${FILE/mixtral-8x7B-instruct/tokens\/llama70Bw4a16-bigmixtral-graded}.npz \
             -m /proj/redline/team/mcg/models/Mixtral-8x7B-Instruct-v0.1 -p 9002
     done
+    for FILE in $(cat MIXTRAL.txt); do 
+        printf "\n\n*   *   *   *   STARTING $FILE  *   *   *"
+        python scripts/score_text.py \
+            -i $FILE \
+            -o ${FILE/mixtral-8x7B-instruct/tokens\/bigmixtral-llama70Bw4a16-graded}.npz \
+            -m /disk2/dma0523/models/llama3.1-70b-w4a16 -p 9000
+    done
 """
 import os
 import logging

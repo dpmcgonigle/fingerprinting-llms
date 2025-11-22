@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class LogProbs:
     decoded_tokens: npt.NDArray[np.str_]
     token_ids: npt.NDArray[np.int32]
-    token_ranks: list[np.int16]
+    token_ranks: list[np.int32]
     token_probs: list[np.float32]
 
     @property
@@ -33,7 +33,7 @@ class LogProbs:
             decoded_tokens, dtype=np.str_
         )  # saves/loads without pickle
         arr_ids = np.asarray(token_ids, dtype=np.int32)
-        arr_ranks = np.asarray(token_ranks, dtype=np.int16)
+        arr_ranks = np.asarray(token_ranks, dtype=np.int32)
         arr_probs = np.asarray(token_probs, dtype=np.float32)  # allow np.nan / -np.inf
 
         logger.info(f"decoded_tokens.size {arr_decoded.size}")
@@ -55,7 +55,7 @@ class LogProbs:
         Arrays written:
           - decoded_tokens : np.ndarray[str]   (Unicode)
           - token_ids      : np.int32
-          - token_ranks    : np.int16
+          - token_ranks    : np.int32
           - token_probs    : np.float32  (use NaN or -inf for missing)
 
         Args:
