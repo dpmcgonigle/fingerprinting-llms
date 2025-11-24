@@ -3,6 +3,7 @@ name: llm-fp
 channels:
   - conda-forge
 dependencies:
+  - datasets<4.0.0
   - ftfy
   - huggingface_hub
   - ipython

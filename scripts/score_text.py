@@ -51,6 +51,74 @@ Usage:
             -o ${FILE/mixtral-8x7B-instruct/tokens\/bigmixtral-llama70Bw4a16-graded}.npz \
             -m /disk2/dma0523/models/llama3.1-70b-w4a16 -p 9000
     done
+
+    HC3
+    for FILE in $(find data/hc3/human_answers/ -type f); do echo $FILE >> HC3_HUMAN.txt; done
+    for FILE in $(find data/hc3/chatgpt_answers/ -type f); do echo $FILE >> HC3_CHATGPT.txt; done
+
+    for FILE in $(cat HC3_HUMAN.txt); do 
+        printf "\n\n*   *   *   *   STARTING $FILE  *   *   *"
+        python scripts/score_text.py \
+            -i $FILE \
+            -o ${FILE/hc3/tokens\/human_llama-graded}.npz \
+            -m /disk2/dma0523/models/llama3.1-70b-w4a16 -p 9001
+    done
+    for FILE in $(cat HC3_CHATGPT.txt); do 
+        printf "\n\n*   *   *   *   STARTING $FILE  *   *   *"
+        python scripts/score_text.py \
+            -i $FILE \
+            -o ${FILE/hc3/tokens\/chatgpt_llama-graded}.npz \
+            -m /disk2/dma0523/models/llama3.1-70b-w4a16 -p 9001
+    done
+
+    for FILE in $(cat HC3_HUMAN.txt); do 
+        printf "\n\n*   *   *   *   STARTING $FILE  *   *   *"
+        python scripts/score_text.py \
+            -i $FILE \
+            -o ${FILE/hc3/tokens\/human_mixtral-graded}.npz \
+            -m /proj/redline/team/mcg/models/Mixtral-8x7B-Instruct-v0.1 -p 9002
+    done
+    for FILE in $(cat HC3_CHATGPT.txt); do 
+        printf "\n\n*   *   *   *   STARTING $FILE  *   *   *"
+        python scripts/score_text.py \
+            -i $FILE \
+            -o ${FILE/hc3/tokens\/chatgpt_mixtral-graded}.npz \
+            -m /proj/redline/team/mcg/models/Mixtral-8x7B-Instruct-v0.1 -p 9002
+    done
+
+    MAGE
+    for FILE in $(find data/mage/human/ -type f); do echo $FILE >> MAGE_HUMAN.txt; done
+    for FILE in $(find data/mage/llm/ -type f); do echo $FILE >> MAGE_LLM.txt; done
+
+    for FILE in $(cat MAGE_HUMAN.txt); do 
+        printf "\n\n*   *   *   *   STARTING $FILE  *   *   *"
+        python scripts/score_text.py \
+            -i $FILE \
+            -o ${FILE/mage/tokens\/mage\/human_llama-graded}.npz \
+            -m /disk2/dma0523/models/llama3.1-70b-w4a16 -p 9001
+    done
+    for FILE in $(cat MAGE_LLM.txt); do 
+        printf "\n\n*   *   *   *   STARTING $FILE  *   *   *"
+        python scripts/score_text.py \
+            -i $FILE \
+            -o ${FILE/mage/tokens\/mage\/llm_llama-graded}.npz \
+            -m /disk2/dma0523/models/llama3.1-70b-w4a16 -p 9001
+    done
+
+    for FILE in $(cat MAGE_HUMAN.txt); do 
+        printf "\n\n*   *   *   *   STARTING $FILE  *   *   *"
+        python scripts/score_text.py \
+            -i $FILE \
+            -o ${FILE/mage/tokens\/mage\/human_mixtral-graded}.npz \
+            -m /proj/redline/team/mcg/models/Mixtral-8x7B-Instruct-v0.1 -p 9002
+    done
+    for FILE in $(cat MAGE_LLM.txt); do 
+        printf "\n\n*   *   *   *   STARTING $FILE  *   *   *"
+        python scripts/score_text.py \
+            -i $FILE \
+            -o ${FILE/mage/tokens\/mage\/llm_mixtral-graded}.npz \
+            -m /proj/redline/team/mcg/models/Mixtral-8x7B-Instruct-v0.1 -p 9002
+    done
 """
 import os
 import logging

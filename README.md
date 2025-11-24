@@ -14,6 +14,7 @@
     - [llm-fingerprinting](#llm-fingerprinting)
 - [Data](#data)
     - [Reuters 5050 Subset](#reuters-5050-subset)
+    - [Reuters 5050 Subset](#reuters-5050-subset)
 
 ## Project Description
 This project explores methods to **fingerprint large language models (LLMs)** by analyzing statistical and structural properties of generated text.  This is a project for the Mathematics Senior Seminar at UML.
@@ -56,6 +57,10 @@ Going deeper into the search space from the Burstiness-AllReuters notebooks for 
 
 Looking at specific patterns of text as "events" to see if there is a detectable difference between human and LLM-generated content. 
 
+### Burstiness-HC3
+
+Expanding initial burstiness exploration into a new dataset -- HC3
+
 [Back to Top](#fingerprinting-llms)
 
 ## Project Documentation
@@ -84,10 +89,12 @@ For a simple install:
 [Back to Top](#fingerprinting-llms)
 
 ## Data
-The dataset is
 
 ### Reuters 5050 Subset
-Description and data in rcv1-uc-irvine-subset (data not currently stored in repository).
+Description and data in [rcv1-uc-irvine-subset README.md](data/rcv1-uc-irvine-subset/reuter5050/README.md).
+
+### Human ChatGPT Comparison Corpus (HC3) Dataset
+Description and data in [HC3 README.md](data/hc3/README.md).
 
 [Back to Top](#fingerprinting-llms)
 
