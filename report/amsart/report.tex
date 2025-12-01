@@ -16,6 +16,7 @@
 \usepackage{enumitem}
 \usepackage{amsmath}
 \usepackage{cleveref}
+\usepackage{placeins}
 \usepackage{booktabs,tabularx,siunitx,makecell}
 \usepackage[final]{microtype} % better line breaks & glyph protrusion
 \emergencystretch=3em         % gentle, global safety valve
@@ -36,6 +37,16 @@
   pdfauthor={Daniel McGonigle},
   pdftitle={Fingerprinting Large Language Models Using Signal Processing}
 }
+
+% More Preamble
+\makeatletter
+\renewcommand\subsubsection{%
+  \@startsection{subsubsection}{3}{\z@}%
+    {-2.5ex\@plus -1ex \@minus -.2ex}%  % space above
+    {1.0ex\@plus .2ex}%                % space below
+    {\normalfont\normalsize\bfseries\itshape}%
+}%
+\makeatother
 
 % Optional: line spacing for readability (uncomment if desired)
 % \onehalfspacing
@@ -222,7 +233,43 @@ The corpus was developed to represent high-quality student writing across a wide
 Römer and O'Donnell~\cite{roemer2011micusp} describe the design and compilation of MICUSP (Part 1), emphasizing the corpus's multi-disciplinary structure and genre taxonomy. The resulting collection comprises approximately 830 student papers totaling 2.6 million words, with metadata including discipline, genre, grade level, native language, and gender of the author.
 
 % ---------- CHAPTER 3: Methods ----------
-% ---------- SECTION 2: Token-Level Grading of Text Samples ----------
+% ---------- SECTION 2: Additional Datasets ----------
+% ---------- Additional Datasets ----------
+\subsection{Additional Datasets}
+\label{sec:additional_datasets}
+
+In addition to the Reuters-based comparisons, we evaluate two further datasets
+that have become standard testbeds for distinguishing human- and
+machine-generated text: \textbf{HC3} and \textbf{MAGE}. These datasets differ
+substantially in authorship sources, domains, and LLM families, providing
+complementary perspectives on how the log-probability signal varies across
+models and content types.
+
+\paragraph{HC3 (Human ChatGPT Comparison Corpus).}
+The HC3 dataset~\cite{hc3} consists of paired human-written and ChatGPT-generated
+answers to the same questions across multiple domains, including medicine,
+finance, and general knowledge. Because queries are shared across modalities,
+differences arise purely from stylistic and distributional properties of the
+text rather than topical content. The dataset is widely used for evaluating
+LLM-generated text detection and has been updated to include GPT-3.5 and GPT-4
+outputs. In our experiments, HC3 provides a perspective on older-generation
+models (GPT-3.5), revealing consistent separability via statistics-, Fourier-,
+and wavelet-based features.
+
+\paragraph{MAGE (Model-Agnostic Generation Evaluation).}
+The MAGE dataset~\cite{mage} introduces a large-scale, heterogeneous collection
+of human- and machine-authored responses spanning multiple tasks, domains, and
+modern LLM families. Unlike HC3, MAGE includes outputs from newer-generation
+models—such as ChatGPT variants, PaLM, and GPT-4—which produce more human-like
+distributions and exhibit reduced stylistic artifacts. As a result, MAGE
+constitutes a significantly more challenging classification environment, with
+many traditional detection signals reduced or absent. In our results, MAGE shows
+lower separability across feature families, highlighting the increasing
+difficulty of detecting machine-generated text as models continue to improve.
+
+
+% ---------- CHAPTER 3: Methods ----------
+% ---------- SECTION 3: Token-Level Grading of Text Samples ----------
 \subsection{Token-Level Grading of Text Samples}
 \label{sec:grading}
 
@@ -254,7 +301,7 @@ Using this method, we generated three distinct graded datasets:
 Each group thus consists of the same fundamental signal type—a sequence of token-level log-probabilities—but derived under different combinations of generator and evaluator. Throughout the remainder of this report, we refer to these sequences as \emph{graded signals}, and their statistical and spectral properties form the basis of the analyses that follow.
 
 % ---------- CHAPTER 3: Methods ----------
-% ---------- SECTION 3: Analysis of Distributions ----------
+% ---------- SECTION 4: Analysis of Distributions ----------
 \subsection{Analysis of Distributions}
 \label{sec:dist_analysis}
 
@@ -272,7 +319,7 @@ For each group, we extract per-token log-probabilities, normalized probabilities
 The goal of this analysis is not merely to detect separability, but to characterize *what form* these separations take. For example, a consistent rightward shift in the LLaMA-generated distributions would suggest that the model assigns higher confidence to its own outputs compared to human-written text, whereas discrepancies between LLaMA-graded and Mixtral-graded distributions may indicate calibration or alignment differences between evaluators. Together, these distributional experiments provide a statistical foundation for subsequent analyses in the frequency domain, where we explore how such differences manifest as structured temporal or spectral patterns across token sequences.
 
 % ---------- CHAPTER 3: Methods ----------
-% ---------- SECTION 4: Analysis of Signals ----------
+% ---------- SECTION 5: Analysis of Signals ----------
 \subsection{Analysis of Signals}
 \label{sec:signal_analysis}
 
@@ -337,7 +384,7 @@ In addition to spectral and wavelet analyses, we examined several time-series pr
 These methods complement the spectral analyses by providing interpretable, scale-agnostic features describing signal stability, smoothness, and self-similarity.
 
 % ---------- CHAPTER 3: Methods ----------
-% ---------- SECTION 5: Classification and Validation ----------
+% ---------- SECTION 6: Classification and Validation ----------
 \subsection{Classification and Validation}
 \label{sec:classification}
 
@@ -371,8 +418,44 @@ Threshold analysis allowed us to identify features with strong individual separa
 % ---------- SECTION 1: Statistical Analysis ----------
 \subsection{Statistical Analysis}
 \label{sec:statistical_analysis}
-The ECDF and aggregate token log-probability distribution graphics indicate that there are some clear statistical differences between human-authored and AI-generated text. Further
+Statistical analysis uncovered distribution differences between the different populations of document token log probabilities. In particular, the ECDF and aggregate token log-probability distribution between human-authored and AI-generated Reuters documents showed some interesting differences. 
 
+
+% ---------- CHAPTER 4, SECTION 1, SUBSECTION 1: ECDF ----------
+\subsubsection{Empirical Cumulative Distribution Function}
+\label{sec:statistical_analysis_ecdf}
+
+\noindent
+\begin{minipage}[t]{0.46\textwidth}
+\raggedright
+\footnotesize
+\textbf{Aggregate Token Log-Probability Distributions}\\[3pt]
+{\scriptsize
+This plot shows the empirical distribution of token log-probabilities
+(ECDF-style density) aggregated over 1{,}000 documents from each modality:
+Human-Generated, Llama-Graded (HGLG); Llama-Generated, Llama-Graded (LGLG);
+and Mixtral-Generated, Llama-Graded (MGLG).
+
+A clear pattern emerges: LGLG tokens cluster far more tightly near zero
+(high probability), indicating that LLaMA assigns consistently confident
+log-probabilities to its own generated text. In contrast, HGLG and MGLG
+exhibit broader distributions that extend further into lower-probability
+regions. MGLG displays a slightly sharper rise near 0 than HGLG, suggesting
+marginally more confident token predictions than in human-written text.
+}
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\footnotesize
+\vspace{0pt}%
+\includegraphics[width=\linewidth]{rcv1_agg_ECDF.png}
+\end{minipage}
+
+
+% ---------- CHAPTER 4, SECTION 1, SUBSECTION 2: Distance Measures ----------
+\subsubsection{Distribution Distance Measures}
+\label{sec:statistical_analysis_dist_meas}
 Distribution distance measures indicate that the difference between log probabilities from human- and machine-generated text is an order of magnitude greater than the difference between machine-generated text that is "graded" by the same model vs. a different family of model:
 
 \sisetup{table-number-alignment=center, table-figures-integer=1, table-figures-decimal=6}
@@ -380,7 +463,8 @@ Distribution distance measures indicate that the difference between log probabil
 \begin{table}[h!]
 \centering
 \small
-\caption{Divergence and Distance Metrics Between Aggregated Distributions}
+\caption{Divergence and distance metrics between aggregated distributions. 
+1,000 pairs of Human-Generated, Llama-Graded (HGLG), Llama-Generated, Llama-Graded (LGLG), and Mixtral-Generated, Llama-Graded documents. The difference between human and model-generated distributions are consistently greater than differences between two model-generated distributions.}
 \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X
   S[table-format=1.6]
   S[table-format=1.6]
@@ -397,27 +481,190 @@ Distribution distance measures indicate that the difference between log probabil
 \multicolumn{1}{c}{\textbf{KS}} &
 \multicolumn{1}{c}{\makecell{\textbf{Wasser-}\\\textbf{stein-1}}} \\
 \midrule
-Human (agg) vs LLaMA (agg)   & 0.156811 & 0.122653 & 0.032095 & 0.179150 & 0.204269 & 0.873242 \\
-Human (agg) vs Mixtral (agg) & 0.144633 & 0.122374 & 0.029919 & 0.172971 & 0.168239 & 0.787727 \\
-LLaMA (agg) vs Mixtral (agg) & 0.013986 & 0.023439 & 0.002481 & 0.049805 & 0.050220 & 0.113508 \\
+HGLG (agg) vs LGLG (agg)   & 0.151732 & 0.131382 & 0.034476 & 0.185676 & 0.204903 & 0.849863 \\
+HGLG (agg) vs MGLG (agg)   & 0.320362 & 0.178440 & 0.050375 & 0.224444 & 0.067845 & 0.346447 \\
+LGLG (agg) vs MGLG (agg)   & 0.058363 & 0.030558 & 0.008051 & 0.089725 & 0.137712 & 0.583223 \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
+% ---------- CHAPTER 4, SECTION 1, SUBSECTION 3: Moving Averages ----------
+\subsubsection{Token Log Probability Moving Averages}
+\label{sec:statistical_analysis_movg_avg}
+
 Finally, one of the most compelling pieces of visual evidence from analyzing the log-probability signal characteristics using a moving average chart. You can see that the high frequency patterns for an individual document are far more greatly pronounced in human-generated text than machine-generated text. There is additionally a small difference in the high frequency patterns between the LLM-generated text as graded by the same model (Llama) vs. another model (Mixtral). This is consistent with the aggregate token log-probability distribution chart.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=\textwidth]{moving_avg_logprobs_2.jpg}
+\caption{Moving average (window size 16) of token log-probabilities for a single example document from each modality: Human-Generated, Llama-Graded (HGLG); Llama-Generated, Llama-Graded (LGLG). The human-generated sequence shows much more pronounced peaks and troughs in the moving average, suggesting sharper changes in model confidence across the document, whereas both LGLG and MGLG (omitted from figure) exhibit smoother, more plateau-like behavior. No strong conclusions can be drawn from a single data point, but the contrast is nevertheless suggestive.}
+\end{figure}
+
 
 % ---------- CHAPTER 4: Methods ----------
 % ---------- SECTION 2: Signal Analysis ----------
-% \subsection{Signal Analysis}
-% \label{sec:signal_analysis}
+\subsection{Signal Analysis Results}
+\label{sec:signal_analysis_results}
+
+Classification based on signal-based features had a couple of clear patterns:
+1. Older models were far more separable, meaning there is stronger difference between token probability patterns created by LLMs and humans, compared with more subtle differences for state of the art LLMs.
+2. Token log probabilities produced by the same model that generated the text appears to be biased in favor of higher probabilities, and is therefore more clearly separable from the human text from a classification standpoint.
+
+We use the macro F1-harmonic score because it balances precision and recall while weighting all classes equally, preventing performance on the dominant class from overwhelming the evaluation. The harmonic formulation further penalizes extreme imbalances between precision and recall, making it a sensitive and robust metric for detecting subtle differences in classification performance across modalities.
+
+\begin{align*}
+\text{Macro-F1}
+  &= \frac{1}{K} \sum_{k=1}^{K}
+     \frac{2\,\text{Precision}_k\,\text{Recall}_k}
+          {\text{Precision}_k + \text{Recall}_k}, \\
+\text{Precision}_k
+  &= \frac{TP_k}{TP_k + FP_k}, \\
+\text{Recall}_k
+  &= \frac{TP_k}{TP_k + FN_k}.
+\end{align*}
+
+
+% ---------- CHAPTER 4, SECTION 2, SUBSECTION 1: Statistical Features ----------
+\subsubsection{Statistical Feature Results}
+\label{sec:stats_features_results}
+
+Statistical features achieved consistently strong performance across all datasets, with macro F1 scores typically ranging from 0.80 to nearly 0.99. These features were especially effective in cases where the model needed to distinguish between human-generated and LLM-generated text (e.g., HC3 and Reuters 50/50), suggesting that simple descriptive measures of the log-probability signal—such as coefficient of variation, local means, and variation of differences—capture robust and discriminative structure across modalities.
+
+% ---------- Stats-based features table ----------
+\begin{table}[h!]
+\centering
+\small
+\caption{Macro F1-harmonic classification performance using statistics-based features only.}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X
+  S[table-format=1.3]}
+\toprule
+\textbf{Dataset / Classification Pair} &
+\multicolumn{1}{c}{\textbf{Macro F1-harmonic}} \\
+\midrule
+rcv1-llama-mixtral & 0.800 \\
+rcv1-mixtral-llama & 0.870 \\
+rcv1-llama-llama   & 0.970 \\
+hc3-llama          & 0.984 \\
+hc3-mixtral        & 0.989 \\
+mage-llama         & 0.876 \\
+mage-mixtral       & 0.806 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+\begin{figure}[h!]
+\centering
+\setlength{\fboxsep}{0pt}%
+\fbox{%
+  \includegraphics[width=\textwidth]{stats-feature-importances.jpg}%
+}
+\caption{Random forest classifier feature importances for all statistics-based features across the six classification settings.  
+Although the exact ranking varies by dataset and pair, coefficient-of-variation (cv\_local\_*) features are typically the most important, with variation-of-first-differences (vfd\_local\_*) and autocorrelation (acf\_*) features also contributing.  
+Here, \texttt{w\#} denotes the window size in tokens, \texttt{n\#} indicates whether the feature is computed on first (\texttt{n1}) or second (\texttt{n2}) differences, and \texttt{p\#} is the percentile (e.g., p25, p75) used in the statistic.}
+\end{figure}
+
+
+% Force above figure to be placed before continuing
+% But don't start a new page after
+\FloatBarrier
+
+
+% ---------- CHAPTER 4, SECTION 2, SUBSECTION 2: Fourier Features ----------
+\subsubsection{Fourier Feature Results}
+\label{sec:fourier_features_results}
+
+Fourier-based features showed weak to moderate performance overall, with F1 scores generally between 0.60 and 0.88. While they sometimes provided meaningful signal, they were typically outperformed by both statistics-based and wavelet-based features. This pattern suggests that global frequency characteristics of the log-probability sequence do contain differences between modalities, but these differences may be too coarse or diffuse compared to the more localized features extracted by the other approaches.
+
+% ---------- Fourier-based features table ----------
+\begin{table}[h!]
+\centering
+\small
+\caption{Macro F1-harmonic classification performance using Fourier-based features only.}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X
+  S[table-format=1.3]}
+\toprule
+\textbf{Dataset / Classification Pair} &
+\multicolumn{1}{c}{\textbf{Macro F1-harmonic}} \\
+\midrule
+rcv1-llama-mixtral & 0.675 \\
+rcv1-mixtral-llama & 0.692 \\
+rcv1-llama-llama   & 0.878 \\
+hc3-llama          & 0.845 \\
+hc3-mixtral        & 0.974 \\
+mage-llama         & 0.602 \\
+mage-mixtral       & 0.648 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=\textwidth]{fourier-feature-importances.jpg}
+\caption{Random forest feature importances for Fourier-based features on the three settings where they provide reasonably strong classification performance: HGLG vs.\ LGLG (left), Llama-graded HC3 (center), and Mixtral-graded HC3 (right).  
+Across these cases, spectral centroid and spectral slope features (especially with window sizes 64 and 128) are consistently important, with spectral entropy and high-frequency energy ratios (fft\_energy\_ratio\_cut*) also contributing.  
+For Mixtral-graded HC3, spectral flatness dominates, indicating that differences in how “peaky’’ or “noise-like’’ the spectra are play a key role in separating modalities.}
+\end{figure}
+
+% Force above figure to be placed before continuing
+% But don't start a new page after
+\FloatBarrier
+
+
+% ---------- CHAPTER 4, SECTION 2, SUBSECTION 3: Wavelet Features ----------
+\subsubsection{Wavelet Feature Results}
+\label{sec:wavelet_features_results}
+
+Wavelet-based features performed very strongly, in several cases matching or surpassing the statistics-based features, with F1 scores reaching as high as 0.99. Their strength was especially notable in fine-grained comparisons (e.g., rcv1-mixtral-llama), where multiscale structure in the log-probability signal appears highly discriminatory. This indicates that wavelets’ ability to capture localized, scale-dependent fluctuations offers a rich representation that complements and sometimes exceeds the discriminative power of purely statistical or Fourier-based approaches.
+
+% ---------- Wavelet-based features table ----------
+\begin{table}[h!]
+\centering
+\small
+\caption{Macro F1-harmonic classification performance using wavelet-based features only.}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X
+  S[table-format=1.3]}
+\toprule
+\textbf{Dataset / Classification Pair} &
+\multicolumn{1}{c}{\textbf{Macro F1-harmonic}} \\
+\midrule
+rcv1-llama-mixtral & 0.729 \\
+rcv1-mixtral-llama & 0.993 \\
+rcv1-llama-llama   & 0.965 \\
+hc3-llama          & 0.958 \\
+hc3-mixtral        & 0.978 \\
+mage-llama         & 0.677 \\
+mage-mixtral       & 0.703 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=\textwidth]{wavelet-feature-importances.jpg}
+\caption{Random forest feature importances for wavelet-based features across selected classification settings. 
+For the Reuters-style datasets (HGLG vs.\ MGLG, using Llama 3.1 and Mixtral) and for HC3 (GPT\mbox{-}3.5), wavelet detail \emph{kurtosis} and \emph{entropy} features consistently emerge as key discriminators, suggesting that higher-order statistics of the wavelet coefficients capture modality-specific structure in the log-probability signal. 
+In contrast, for the MAGE dataset involving newer models, high-frequency wavelet energy ratios dominate while kurtosis and entropy play a lesser role, and the overall separability is noticeably weaker, indicating that these newer systems produce log-probability patterns that are harder to distinguish using the same wavelet feature family.}
+\end{figure}
+
+Wavelet detail coefficient kurtosis measures how often the log-probability sequence contains rare but sharp local deviations at specific scales. High kurtosis indicates a signal dominated by small coefficients with occasional large spikes, while low kurtosis reflects smoother, more uniform structure. Its usefulness as a feature suggests that the distinguishability between human and model text partly arises from differences in how abruptly the token probabilities change over short spans. 
+
+Wavelet detail coefficient entropy, by contrast, summarizes the overall disorder or unpredictability of the wavelet coefficients, indicating how evenly energy is spread across scales and positions. The strong performance as classification features suggests that human- and model-generated texts differ not just in average magnitude or frequency content, but in the higher-order structure and local complexity of their log-probability fluctuations.
+
+% Force above figure and text to be placed before continuing
+% But don't start a new page after
+\FloatBarrier
 
 
 % ---------- CHAPTER 5: Conclusion and Future Works ----------
 \section{Conclusion and Future Work}
 \label{ch:conclusion}
-In this study, we compared aggregated distributions of human- and model-generated text using a range of divergence and distance metrics. The results highlight measurable but nuanced differences between the underlying probability structures of the evaluated sources, suggesting that statistical signatures of large language models can be detected even when aggregated across samples. 
+In this study, we compared aggregated distributions of LLM-derived token log-probabilities for human- and model-generated text using a range of techniques that included statistical measures and signal processing tools. We looked at 3 datasets in order to evaluate robustness as well as to identify some of the differences between sequences created by a variety of different LLMs. The results highlight measurable but nuanced differences between the underlying probability structures of the evaluated sources, suggesting that signal-based signatures of large language models can often be detected even when aggregated across samples. Local patterns tended to be far more pronounced than global patterns, with simple statistical measures, with the most predictive features being coefficient of variation and variation of first differences.  Wavelet-based features also tended to fare well with separating human- from llm-generated work, especially when looking at higher frequency characteristics.
 
-Future work will expand on these findings by incorporating additional models, finer-grained feature representations, and temporal analyses of model drift. We also plan to investigate the robustness of these divergence-based metrics under varying sampling conditions and explore their integration into a broader detection framework combining statistical and deep learning approaches.
+The findings from this research also appear to suggest that differences between human- and llm-generated text are far harder to discern when evaluating text written by many models, such as those utilized in the MAGE datset.  It is possible also that this could be a result of this technique having difficulty with newer models, but more research would have to be done with newer models in order to make that determination.
+
+There are two main areas of future work we'd like to explore.  The first would be to evaluate additional feature representations, adding more focus to lower frequency features and trying to produce more robust features than just the high frequency space that we probed in this work. We additionally want to expand on the findings from this paper by incorporating newer models and trying to learn characteristics and patterns that are specific to particular LLMs or LLM families. The ideal goal would be a multi-class classification capability that identifies the particular model (or model family) that a body of text was generated by.
 
 
 % ---------- References ----------
