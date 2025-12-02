@@ -198,9 +198,9 @@ Wavelet analysis has proven useful for analyzing signals with nonstationary or m
 In this research, these per-token log-probabilities are treated as a \emph{temporal signal} that evolves as the model generates text. Each step in generation corresponds to a new sample in a discrete-time series, conditioned on the precedidng context. This framing allows the use of signal-processing tools---such as Fourier and wavelet transforms---to examine structure in the \emph{frequency domain} to look for distinctive patterns or anomalies. If model outputs differ systematically from human writing in the smoothness, periodicity, or spectral composition of their log-probability sequences, these differences can be interpreted as latent \emph{fingerprints} of the model's internal generative dynamics. 
 
 % ---------- CHAPTER 3: Methods ----------
-% ---------- SECTION 1: Dataset Curation ----------
-\subsection{Dataset Curation}
-\label{sec:dataset_curation}
+% ---------- SECTION 1: Datasets ----------
+\subsection{Datasets}
+\label{sec:datasets}
 This research focused on datasets with several key characteristics to amplify signal differences related to LLM patterns and minimize signal differences produced by other "uninteresting" factors:
 
 \begin{enumerate}[label=\arabic*., leftmargin=2em]
@@ -211,16 +211,10 @@ This research focused on datasets with several key characteristics to amplify si
 
 Ultimately, our aim is to boost the signal coming from LLM attention mechanics and sampling technique, and not domain-specific jargon or egregious human error.
 
-\subsubsection{Source Corpus: Reuters~50/50 (Subset of RCV1)}
+\subsubsection{Reuters~50/50 (Subset of RCV1)}
 \label{sec:reuters5050}
 
-%
-%
-%   McGonigle stopped here 12/01/2025
-%
-%
-
-The primary dataset used in this study is the \textit{Reuters~50/50} corpus, a balanced subset derived from the \textit{Reuters Corpus Volume~1 (RCV1)}~\cite{lewis2004rcv1}.  
+The first dataset used in this study is the \textit{Reuters~50/50} corpus, a balanced subset derived from the \textit{Reuters Corpus Volume~1 (RCV1)}~\cite{lewis2004rcv1}.  
 The full RCV1 dataset contains over 800{,}000 newswire stories published by Reuters Ltd.\ between August~20,~1996 and August~19,~1997.  
 Each article was manually and algorithmically categorized into hierarchical topic codes, industry sectors, and regions, forming one of the most influential benchmark corpora for text classification, information retrieval, and distributional semantics.
 
@@ -233,7 +227,14 @@ This balance reduces topical bias and supports fair evaluation of linguistic or 
 All Reuters documents were processed in a way to minimize patterns that might manifest as signal differences between human- and machine-generated text. Documents were normalized to UTF--8, spelling was corrected, and dates were standardized to a consistent format. 
 
 \paragraph{Generation.}
-The LLM-generated corpus was produced using Meta's \textit{Llama~3.1} model, a 70\,billion-parameter transformer architecture deployed in quantized form for efficient inference. Through iterative prompt engineering, a standardized procedure was developed to generate machine-authored documents that mirror the stylistic and structural characteristics of human writing while avoiding confounding artifacts such as domain-specific jargon, formatting inconsistencies, or explicit references to named entities. The objective was to construct a corpus in which any measurable signal differences between human- and model-generated text could be attributed primarily to stylistic and probabilistic properties of the language model itself rather than to topical or contextual factors.
+The LLM-generated corpus was produced and evaluated using two different models:
+
+\begin{itemize}
+    \item Meta's \textit{Llama~3.1} model, a 70\,billion-parameter transformer architecture deployed in quantized form for efficient inference.
+    \item MistralAI's \textit{Mixtral~8x7}, an 8-expert mixture-of-experts model with 7 billion parameters per "expert".
+\end{itemize}
+
+The objective was to construct a corpus in which any measurable signal differences between human- and model-generated text could be attributed primarily to stylistic and probabilistic properties of the language model itself rather than to topical or contextual factors.
 
 \medskip
 \noindent
@@ -248,17 +249,7 @@ The generation methodology for each human-written document proceeded as follows:
 \noindent
 This approach yielded a synthetic corpus that is topically aligned and stylistically comparable to the human-authored datasets (MICUSP and Reuters~50/50), enabling controlled comparative analysis of statistical and spectral features.
 
-\subsubsection{Source Corpus: The Michigan Corpus of Upper-Level Student Papers (MICUSP)}
-
-A secondary dataset used in preliminary analysis for this study is the \textit{Michigan Corpus of Upper-level Student Papers (MICUSP)}, a well-documented collection of academic writing produced by proficient undergraduate and graduate students at the University of Michigan~\cite{roemer2011micusp,odonnell2012micusp}.  
-The corpus was developed to represent high-quality student writing across a wide range of academic disciplines, capturing authentic examples of advanced learner language in academic contexts.  
-
-Römer and O'Donnell~\cite{roemer2011micusp} describe the design and compilation of MICUSP (Part 1), emphasizing the corpus's multi-disciplinary structure and genre taxonomy. The resulting collection comprises approximately 830 student papers totaling 2.6 million words, with metadata including discipline, genre, grade level, native language, and gender of the author.
-
-% ---------- CHAPTER 3: Methods ----------
-% ---------- SECTION 2: Additional Datasets ----------
-% ---------- Additional Datasets ----------
-\subsection{Additional Datasets}
+\subsubsection{Additional Datasets}
 \label{sec:additional_datasets}
 
 In addition to the Reuters-based comparisons, we evaluate two further datasets
@@ -283,16 +274,19 @@ and wavelet-based features.
 The MAGE dataset~\cite{mage} introduces a large-scale, heterogeneous collection
 of human- and machine-authored responses spanning multiple tasks, domains, and
 modern LLM families. Unlike HC3, MAGE includes outputs from newer-generation
-models—such as ChatGPT variants, PaLM, and GPT-4—which produce more human-like
-distributions and exhibit reduced stylistic artifacts. As a result, MAGE
+models—such as ChatGPT variants, PaLM, which produce more human-like
+distributions and likely exhibit reduced stylistic artifacts. As a result, MAGE
 constitutes a significantly more challenging classification environment, with
-many traditional detection signals reduced or absent. In our results, MAGE shows
-lower separability across feature families, highlighting the increasing
-difficulty of detecting machine-generated text as models continue to improve.
+many traditional detection signals reduced or absent. 
 
+%
+%
+%   McGonigle stopped here 12/02/2025
+%
+%
 
 % ---------- CHAPTER 3: Methods ----------
-% ---------- SECTION 3: Token-Level Grading of Text Samples ----------
+% ---------- SECTION 2: Token-Level Grading of Text Samples ----------
 \subsection{Token-Level Grading of Text Samples}
 \label{sec:grading}
 
@@ -352,7 +346,7 @@ Using this method, we generated three distinct graded datasets:
 Each group thus consists of the same fundamental signal type—a sequence of token-level log-probabilities—but derived under different combinations of generator and evaluator. Throughout the remainder of this report, we refer to these sequences as \emph{graded signals}, and their statistical and spectral properties form the basis of the analyses that follow.
 
 % ---------- CHAPTER 3: Methods ----------
-% ---------- SECTION 4: Analysis of Distributions ----------
+% ---------- SECTION 3: Analysis of Distributions ----------
 \subsection{Analysis of Distributions}
 \label{sec:dist_analysis}
 
@@ -370,7 +364,7 @@ For each group, we extract per-token log-probabilities, normalized probabilities
 The goal of this analysis is not merely to detect separability, but to characterize *what form* these separations take. For example, a consistent rightward shift in the LLaMA-generated distributions would suggest that the model assigns higher confidence to its own outputs compared to human-written text, whereas discrepancies between LLaMA-graded and Mixtral-graded distributions may indicate calibration or alignment differences between evaluators. Together, these distributional experiments provide a statistical foundation for subsequent analyses in the frequency domain, where we explore how such differences manifest as structured temporal or spectral patterns across token sequences.
 
 % ---------- CHAPTER 3: Methods ----------
-% ---------- SECTION 5: Analysis of Signals ----------
+% ---------- SECTION 4: Analysis of Signals ----------
 \subsection{Analysis of Signals}
 \label{sec:signal_analysis}
 
@@ -435,7 +429,7 @@ In addition to spectral and wavelet analyses, we examined several time-series pr
 These methods complement the spectral analyses by providing interpretable, scale-agnostic features describing signal stability, smoothness, and self-similarity.
 
 % ---------- CHAPTER 3: Methods ----------
-% ---------- SECTION 6: Classification and Validation ----------
+% ---------- SECTION 5: Classification and Validation ----------
 \subsection{Classification and Validation}
 \label{sec:classification}
 
