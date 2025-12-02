@@ -3,6 +3,9 @@
 ##  Description
 This is just a place to document specific issues I've run into
 
+##  Mixtral whitespace issue (12/01/2025)
+It appears that the Mixtral documents all start with a space, which adds a very, very low probability token to start with.
+
 ##  Integer out of bounds
 My token ranks is currently using int16, but it seems like the size of the vocabulary exceeds that:
 
