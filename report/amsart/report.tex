@@ -191,6 +191,8 @@ where \( a \) and \( b \) denote the scale and translation parameters, respectiv
 Wavelet analysis has proven useful for analyzing signals with nonstationary or multi-scale structure—ranging from geophysical and biomedical signals to linguistic data~\cite{addison2017illustrated}.
 
 
+\clearpage
+
 % ---------- CHAPTER 3: Methods ----------
 \section{Methods}
 \label{ch:methods}
@@ -279,19 +281,13 @@ distributions and likely exhibit reduced stylistic artifacts. As a result, MAGE
 constitutes a significantly more challenging classification environment, with
 many traditional detection signals reduced or absent. 
 
-%
-%
-%   McGonigle stopped here 12/02/2025
-%
-%
 
 % ---------- CHAPTER 3: Methods ----------
 % ---------- SECTION 2: Token-Level Grading of Text Samples ----------
 \subsection{Token-Level Grading of Text Samples}
 \label{sec:grading}
 
-The signal used in this work comes from the model's 
-token-level log-probabilities for human-written and LLM-generated text.
+This research utilizes the token-level log-probabilities from human-written and LLM-generated text as signal for analysis.
 Below are visualizations in which each cell shows a token, its rank under the model's predictive distribution,
 and the corresponding log-probability (color-coded: green = high probability,
 red = low probability).
@@ -318,30 +314,34 @@ features used in this project.
     \label{fig:llm-logprobs}
 \end{figure}
 
-To enable a consistent comparison between human- and model-generated writing, we represent each text as a sequence of token-level probabilities as assigned by a reference large language model (LLM). We use the term \emph{grading} to refer to the generation of token-level log probabilities for a given text. We accomplish this by passing a text sample through an LLM in a non-generative (evaluation-only) mode and recording the model's conditional log-probability for each observed token, given all preceding context. Formally, for a text sequence $x = (x_1, x_2, \dots, x_T)$, we obtain
+To enable a consistent comparison between human- and model-generated writing, we represent each text as a sequence of token-level probabilities as assigned by a reference large language model (LLM). We use the term \emph{grading} to refer to the generation of token-level log probabilities from a particular model for a given text document. We accomplish this by passing a text sample through an LLM in a non-generative (evaluation-only) mode and recording the model's conditional log-probability for each observed token, given all preceding context. Formally, for a text sequence $x = (x_1, x_2, \dots, x_T)$, we obtain
 \[
     \ell_t = \log P_\theta(x_t \mid x_{<t}),
 \]
 where $P_\theta$ denotes the probability distribution defined by the model with parameters $\theta$. The resulting series $\{\ell_t\}_{t=1}^T$ represents the model's internal assessment of how \emph{expected} or \emph{surprising} each token is within its surrounding context.
 
 \subsubsection*{Motivation and Terminology}
-We adopt the term \emph{grading} to describe this process because it parallels how a human evaluator might assign a score to a written text, albeit at a much finer (token-level) granularity. The grading model effectively produces a per-token "confidence profile" that reflects its own linguistic expectations and calibration. When applied to human-written text, these scores reflect how well the human sequence aligns with the model's learned distribution of language; when applied to model-generated text, they measure the model's self-assessment or, in cross-model cases, one model's evaluation of another's output.
+We adopt the term \emph{grading} to describe this process because it parallels how a human evaluator might assign a score to a written text, albeit at a much finer (token-level) granularity. The grading model effectively produces a per-token "confidence profile" that reflects its own linguistic expectations and calibration. When applied to human-written text, these scores reflect how well the human sequence aligns with the model's learned distribution of language. When applied to model-generated text, they measure the model's self-assessment or one model's evaluation of another's output.
 
 \subsubsection*{Procedure}
 For each document in our dataset, we performed the following steps:
 \begin{enumerate}
     \item Tokenize the text using the same tokenizer as the evaluating model (e.g., LLaMA or Mixtral tokenizer).
     \item Feed the full token sequence to the model in evaluation mode (\texttt{generate=False}) to obtain conditional log-probabilities for all tokens.
-    \item Record and store the sequence of token log-probabilities, normalized probabilities, and optional derived features such as per-token entropy and perplexity.
+    \item Record and store the sequence of token log-probabilities, token ranks, position indices, and raw token strings.
 \end{enumerate}
-This grading process was performed for both human-authored and LLM-generated documents, enabling direct statistical comparison between groups. Importantly, the same evaluation model was used consistently within each experimental condition to ensure comparability of scores.
+This grading process was performed for both human-authored and LLM-generated documents, enabling direct statistical comparison between groups. Importantly, we performed self- and cross-model grading in order to evaluate whether a model better "recognizes" its own patterns.
 
 \subsubsection*{Experimental Groupings}
-Using this method, we generated three distinct graded datasets:
+Using this method, we generated seven distinct graded datasets:
 \begin{enumerate}
-    \item \textbf{Human-generated, LLaMA-graded (HG--LG):} Human-written documents graded by LLaMA.
-    \item \textbf{LLaMA-generated, LLaMA-graded (LG--LG):} Model-generated documents graded by LLaMA.
-    \item \textbf{LLaMA-generated, Mixtral-graded (LG--MG):} Model-generated documents graded by Mixtral, to study cross-model calibration and evaluator bias.
+    \item \textbf{Human-generated Reuters 50/50, LLaMA-graded (HG--LG):} Human-written documents graded by LLaMA.
+    \item \textbf{LLaMA-generated Reuters 50/50, LLaMA-graded (LG--LG):} Model-generated documents graded by LLaMA.
+    \item \textbf{LLaMA-generated Reuters 50/50, Mixtral-graded (LG--MG):} Model-generated documents graded by Mixtral, to study cross-model calibration and evaluator bias.
+    \item \textbf{LLaMA-graded HC3:} HC3 dataset graded by LLaMA.
+    \item \textbf{Mixtral-graded HC3:} HC3 dataset graded by Mixtral.
+    \item \textbf{LLaMA-graded MAGE:} MAGE dataset graded by LLaMA.
+    \item \textbf{Mixtral-graded MAGE:} MAGE dataset graded by Mixtral.
 \end{enumerate}
 Each group thus consists of the same fundamental signal type—a sequence of token-level log-probabilities—but derived under different combinations of generator and evaluator. Throughout the remainder of this report, we refer to these sequences as \emph{graded signals}, and their statistical and spectral properties form the basis of the analyses that follow.
 
@@ -350,18 +350,18 @@ Each group thus consists of the same fundamental signal type—a sequence of tok
 \subsection{Analysis of Distributions}
 \label{sec:dist_analysis}
 
-A central question in this study is whether statistical properties of token-level signals differ systematically between human- and model-generated text, and whether those differences remain detectable when using models other than the text-generating model. The preliminary analysis was to first examine the marginal and joint distributions of token log-probabilities and related features. These analyses serve two primary purposes: (1) to characterize surface-level statistical differences that may underlie or interact with deeper temporal patterns, and (2) to assess how such differences vary depending on whether the text was generated or graded by different large language models (LLMs).
+A central question in this study is whether statistical properties of token-level signals differ systematically between human- and model-generated text, and whether those differences remain detectable when using models other than the text-generating model. Preliminary analysis examined the marginal and joint distributions of token log-probabilities and related features. These analyses serve two primary purposes: (1) to characterize surface-level statistical differences that may underlie or interact with deeper temporal patterns, and (2) to assess how such differences vary depending on whether the text was generated or graded by different large language models (LLMs).
 
-Specifically, we compare three experimental groupings:
+We focused on three Reuters 50/50 configurations for this analysis:
 \begin{enumerate}
     \item \textbf{Human-generated, LLaMA-graded (HG--LG):} Human-written documents graded by the LLaMA model.
     \item \textbf{LLaMA-generated, LLaMA-graded (LG--LG):} Model-generated documents graded by the same model that produced them.
-    \item \textbf{LLaMA-generated, Mixtral-graded (LG--MG):} Model-generated documents graded by a distinct LLM (Mixtral) to test grading-model dependence.
+    \item \textbf{LLaMA-generated, Mixtral-graded (LG--MG):} Model-generated documents graded by a distinct LLM (Mixtral).
 \end{enumerate}
 
 For each group, we extract per-token log-probabilities, normalized probabilities, and derived quantities such as entropy. Distributions are then analyzed both marginally and through pairwise comparisons. Empirical cumulative distribution functions (ECDFs), kernel density estimates (KDEs), and Zipf plots are used to visualize deviations between groups. Statistical divergence metrics—including Kullback-Leibler (KL) divergence, Jensen-Shannon (JS) divergence, and the Wasserstein distance—quantify how strongly each pair of distributions differs.
 
-The goal of this analysis is not merely to detect separability, but to characterize *what form* these separations take. For example, a consistent rightward shift in the LLaMA-generated distributions would suggest that the model assigns higher confidence to its own outputs compared to human-written text, whereas discrepancies between LLaMA-graded and Mixtral-graded distributions may indicate calibration or alignment differences between evaluators. Together, these distributional experiments provide a statistical foundation for subsequent analyses in the frequency domain, where we explore how such differences manifest as structured temporal or spectral patterns across token sequences.
+The goal of this analysis is not merely to detect separability, but to characterize *what form* these separations take. For example, a consistent rightward shift in the LLaMA-generated distributions would suggest that the model assigns higher confidence to its own outputs compared to human-written text, whereas discrepancies between LLaMA-graded and Mixtral-graded distributions may indicate calibration or alignment differences between evaluators or tokenization. Together, these distributional experiments provide a statistical foundation for subsequent analyses in the frequency domain, where we explore how such differences manifest as structured temporal or spectral patterns across token sequences.
 
 % ---------- CHAPTER 3: Methods ----------
 % ---------- SECTION 4: Analysis of Signals ----------
@@ -370,7 +370,7 @@ The goal of this analysis is not merely to detect separability, but to character
 
 While distributional comparisons reveal static statistical differences between groups, they do not capture how those differences evolve or manifest over the sequence of tokens. To investigate temporal structure, we treat each graded text as a discrete one-dimensional signal composed of token-level log-probabilities, $\{\ell_t\}_{t=1}^T$. We then analyze these sequences using tools from signal processing, with the aim of identifying rhythmic or self-similar patterns characteristic of human versus model generation.
 
-The methods described in this section include frequency-domain analysis using the Fourier transform, time-frequency analysis using wavelet transforms, and additional time-series techniques such as variance, autocorrelation, and entropy-based metrics.
+The methods described in this section include frequency-domain analysis using the Fourier transform, time-frequency analysis using wavelet transforms, and additional time-series techniques involving autocorrelation, entropy, and other statistical signal properties.
 
 \subsubsection{Fourier Transform Analysis}
 \label{subsec:fourier_methods}
@@ -403,7 +403,7 @@ Together, these spectral metrics provide compact, interpretable summaries of sig
 
 \subsubsection{Wavelet Transform Analysis}
 \label{subsec:wavelet_methods}
-While Fourier transforms reveal global frequency content, they are less suited to identifying how those frequencies vary locally in time. To capture both time and frequency information simultaneously, we apply continuous and discrete wavelet transforms (CWT and DWT). The wavelet transform of $\ell_t$ with respect to a mother wavelet $\psi$ is defined as
+While Fourier transforms reveal global frequency content, they are less suited to identifying how those frequencies vary locally in time. To capture both time and frequency information simultaneously, we apply continuous and discrete wavelet transforms (DWT). The wavelet transform of $\ell_t$ with respect to a mother wavelet $\psi$ is defined as
 \[
     W(a, b) = \frac{1}{\sqrt{a}} \sum_t \ell_t \, \psi^*\!\left( \frac{t - b}{a} \right),
 \]
@@ -437,7 +437,7 @@ Having extracted a diverse set of statistical and spectral features from the gra
 
 \subsubsection{Feature-Level Threshold Analysis}
 For each scalar feature (e.g., spectral centroid, high-frequency energy ratio, autocorrelation time, entropy), we examined its separability between groups by fitting a simple one-dimensional threshold classifier. Thresholds were determined by maximizing accuracy on the training set or, equivalently, by selecting the cut-point that minimized total classification error across the two classes.  
-Receiver Operating Characteristic (ROC) curves and Area Under the ROC Curve (AUROC) values were computed to quantify discriminative strength for each feature independently. The F1 harmonic score was used as a threshold-independent metric for accuracy, factoring in precision and recall. This step provided interpretable baselines and helped identify which features carried the most individual predictive signal prior to multivariate modeling.
+Receiver Operating Characteristic (ROC) curves and Area Under the ROC Curve (AUROC) values were computed to quantify discriminative strength for each feature independently. The F1 harmonic score was used as a threshold-independent metric for accuracy, showing no strong preference between type I and type II errors.
 
 \subsubsection{Random Forest Classification}
 To jointly model multiple, potentially interacting features, we employed a random forest classifier (RFC) implemented with \texttt{scikit-learn}. Random forests are ensemble models composed of multiple decision trees trained on bootstrapped subsets of the data, each considering a random subset of available features at each split. The final prediction is obtained by majority vote over all trees.  
@@ -449,11 +449,26 @@ Model performance was assessed using both $k$-fold cross-validation and independ
     \item \textbf{Cross-validation:} We used stratified $k$-fold cross-validation (typically $k=5$) to estimate variability in model performance across folds. For each fold, metrics including accuracy, precision, recall, F$_1$, and AUROC were computed and averaged.
     \item \textbf{Train/test splits:} In addition to cross-validation, a held-out test set (commonly 20\% of the data) was used for final model evaluation. The model was trained on the remaining 80\% and tested once on unseen samples to approximate out-of-sample generalization performance.
 \end{itemize}
-This dual evaluation strategy ensured that both threshold-based and multivariate classifiers were validated against overfitting and provided reliable estimates of discriminative performance.
+This dual evaluation strategy ensured that both threshold-based and multivariate classifiers were validated against overfitting and provided reliable estimates of discriminative performance.\\
+
+We use the macro F1-harmonic score because it balances precision and recall while weighting all classes equally, preventing performance on the dominant class from overwhelming the evaluation. The harmonic formulation further penalizes extreme imbalances between precision and recall, making it a sensitive and robust metric for detecting subtle differences in classification performance across modalities.
+
+\begin{align*}
+\text{Macro-F1}
+  &= \frac{1}{K} \sum_{k=1}^{K}
+     \frac{2\,\text{Precision}_k\,\text{Recall}_k}
+          {\text{Precision}_k + \text{Recall}_k}, \\
+\text{Precision}_k
+  &= \frac{TP_k}{TP_k + FP_k}, \\
+\text{Recall}_k
+  &= \frac{TP_k}{TP_k + FN_k}.
+\end{align*}
 
 \subsubsection{Interpretation}
 Threshold analysis allowed us to identify features with strong individual separation power, while the random forest classifier leveraged complementary information across heterogeneous features. Together, these approaches quantify the extent to which statistical and spectral properties of the graded signals encode detectable differences between human- and model-generated text, forming the methodological foundation for the performance results presented in the following chapter.
 
+
+\clearpage
 
 % ---------- CHAPTER 4: Results ----------
 \section{Results}
@@ -554,19 +569,6 @@ Finally, one of the most compelling pieces of visual evidence from analyzing the
 Classification based on signal-based features had a couple of clear patterns:
 1. Older models were far more separable, meaning there is stronger difference between token probability patterns created by LLMs and humans, compared with more subtle differences for state of the art LLMs.
 2. Token log probabilities produced by the same model that generated the text appears to be biased in favor of higher probabilities, and is therefore more clearly separable from the human text from a classification standpoint.
-
-We use the macro F1-harmonic score because it balances precision and recall while weighting all classes equally, preventing performance on the dominant class from overwhelming the evaluation. The harmonic formulation further penalizes extreme imbalances between precision and recall, making it a sensitive and robust metric for detecting subtle differences in classification performance across modalities.
-
-\begin{align*}
-\text{Macro-F1}
-  &= \frac{1}{K} \sum_{k=1}^{K}
-     \frac{2\,\text{Precision}_k\,\text{Recall}_k}
-          {\text{Precision}_k + \text{Recall}_k}, \\
-\text{Precision}_k
-  &= \frac{TP_k}{TP_k + FP_k}, \\
-\text{Recall}_k
-  &= \frac{TP_k}{TP_k + FN_k}.
-\end{align*}
 
 
 % ---------- CHAPTER 4, SECTION 2, SUBSECTION 1: Statistical Features ----------
@@ -698,8 +700,7 @@ Wavelet detail coefficient kurtosis measures how often the log-probability seque
 Wavelet detail coefficient entropy, by contrast, summarizes the overall disorder or unpredictability of the wavelet coefficients, indicating how evenly energy is spread across scales and positions. The strong performance as classification features suggests that human- and model-generated texts differ not just in average magnitude or frequency content, but in the higher-order structure and local complexity of their log-probability fluctuations.
 
 % Force above figure and text to be placed before continuing
-% But don't start a new page after
-\FloatBarrier
+\clearpage
 
 
 % ---------- CHAPTER 5: Conclusion and Future Works ----------
@@ -715,7 +716,8 @@ There are two main areas of future work we'd like to explore.  The first would b
 % ---------- References ----------
 \clearpage
 \phantomsection
-\printbibliography[heading=bibintoc,title={References}]
+\printbibliography[title={References}, heading=bibliography]
+
 
 % ---------- Appendices ----------
 \appendix
